@@ -305,7 +305,7 @@ class BaArednMap extends Component {
   openPopup(id) {
     const popup = this.refs[this.canonicalHostname(id)];
     if (popup) {
-      popup.fireLeafletEvent('click');
+      popup.fireEvent('click');
     }
   }
 
