@@ -1,22 +1,21 @@
-{     
-    "name" : "BayArea AREDN",
+{
+    "name" : "Oklahoma AREDN",
     "mapSettings": {
         "zoom": "10",
         "mapCenter": {
-            "node": "kn6plv-brkoxfla-arecibo",
-            "lat": "37.7007",
-            "lon": "-122.0852"
+            "node": "KI5VMF-CLOUD-TUNNEL",
+            "lat": "35.3869",
+            "lon": "-97.4175"
         },
         "servers": [
-            { "test": "http://kn6plv-tiles.local.mesh/tile/10/164/395.png", "url": "http://kn6plv-tiles.local.mesh/tile/{z}/{x}/{y}.png" },
             { "test": "https://c.tile.openstreetmap.org/10/162/395.png", "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" }
         ]
     },
     "contactInfo": {
-        "callsign" : "KN6PLV",
-        "name": "Tim Wilkinson",
-        "email": "tim.j.wilkinson@gmail.com"
+        "callsign" : "KI5VMF",
+        "name": "Jacob McSwain",
+        "email": "aredn-map@mcswain.dev"
     },
-    "nodesFilter" : "[a-zA-z]+[0-9][a-zA-Z]+",
+    "nodesFilter" : ".*",
     "offline" : false
 }
