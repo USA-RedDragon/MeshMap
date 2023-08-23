@@ -21,8 +21,6 @@ WORKDIR /app
 RUN apk add --no-cache curl cronie npm nodejs rsyslog
 RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
-ENV APP_CONFIG=""
-
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 COPY walk.js /app/
@@ -40,7 +38,7 @@ if [ ! -f /usr/share/nginx/html/data/out.json ]; then
   node /app/walk.js &
 fi
 
-echo -n "${APP_CONFIG}" > /usr/share/nginx/html/appConfig.json
+echo -n "\${APP_CONFIG}" > /usr/share/nginx/html/appConfig.json
 
 rsyslogd -n &
 crond -m off -s
