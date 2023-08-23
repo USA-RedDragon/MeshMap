@@ -19,13 +19,13 @@ FROM nginx:1.25.2-alpine
 WORKDIR /app
 
 RUN apk add --no-cache curl cronie npm nodejs rsyslog
-RUN npm i -g axios
 
 ENV APP_CONFIG=""
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 COPY walk.js /app/
+RUN npm i axios
 
 RUN (crontab -l ; echo "30 * * * * node /app/walk.js") | crontab -
 
