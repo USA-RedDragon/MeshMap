@@ -19,6 +19,7 @@ FROM nginx:1.25.2-alpine
 WORKDIR /app
 
 RUN apk add --no-cache curl cronie npm nodejs rsyslog
+RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
 ENV APP_CONFIG=""
 
