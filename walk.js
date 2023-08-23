@@ -117,7 +117,7 @@ new Scanner(
   parseInt(process.env.CONCURRENCY || '2')
 ).scan(process.env.STARTING_NODE || "KI5VMF-CLOUD-TUNNEL-supernode", '.*').then(() => {
   console.log(`Found ${allHosts.length} hosts`)
-  fs.writeFileSync('/out/data.json', JSON.stringify({ nodeInfo: allHosts, date: new Date() }, null, 2))
+  fs.writeFileSync('/usr/share/nginx/html/data/out.json', JSON.stringify({ nodeInfo: allHosts, date: new Date() }, null, 2))
 }).catch((err) => {
   console.error(err)
 })
