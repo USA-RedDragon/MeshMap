@@ -23,6 +23,8 @@ RUN sed -i 's/module(load="imklog")//g' /etc/rsyslog.conf
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+RUN sed -i "s/\#gzip  on/gzip  on/g" /etc/nginx/nginx.conf
+
 COPY walk.js /app/
 RUN npm i axios
 
