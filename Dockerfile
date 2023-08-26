@@ -26,7 +26,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 RUN sed -i "s/#gzip  on;/gzip  on;\n    gzip_vary on;\n    gzip_types text\/plain text\/css application\/json application\/x-javascript application\/javascript text\/xml application\/xml application\/rss\+xml text\/javascript image\/svg\+xml application\/vnd\.ms-fontobject application\/x-font-ttf font\/opentype;/g" /etc/nginx/nginx.conf
 
 COPY walker/ /app/walker/
-RUN cd /app/walker && pip install -r requirements.txt
+
+RUN apk add --virtual .build-deps gcc musl-dev libffi-dev openssl-dev python3-dev \
+    && cd /app/walker \
+    && pip install -r requirements.txt \
+    && apk del .build-deps \
+    && rm -rf /tmp/* /var/cache/apk/*
 
 RUN (crontab -l ; echo "30 * * * * python /app/walker/walk.py") | crontab -
 
@@ -37,7 +42,7 @@ cat <<__EOF__ > /start
 # if /usr/share/nginx/html/data/out.json does not exist, create it
 if [ ! -f /usr/share/nginx/html/data/out.json ]; then
   echo "{}" > /usr/share/nginx/html/data/out.json
-  node /app/walk.js &
+  python /app/walker/walk.py &
 fi
 
 echo -n "\${APP_CONFIG}" > /usr/share/nginx/html/appConfig.json
