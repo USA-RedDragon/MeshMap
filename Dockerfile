@@ -51,7 +51,7 @@ rsyslogd -n &
 crond -m off -s
 nginx
 
-exec tail -f /var/log/nginx/access.log /var/log/nginx/error.log /var/log/messages
+exec tail -F /var/log/nginx/access.log /var/log/nginx/error.log /var/log/messages /var/log/cron.log
 __EOF__
 __DOCKER_EOF__
 
