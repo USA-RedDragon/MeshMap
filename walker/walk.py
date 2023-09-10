@@ -72,15 +72,15 @@ class AsyncWalk:
                                 response["link_info"] = {}
                             self._data.append({
                                 "data": {
-                                    "node": response["node"],
+                                    "node": response["node"] if "node" in response else None,
                                     "lastseen": response["lastseen"] if "lastseen" in response else None,
-                                    "lat": response["lat"],
-                                    "lon": response["lon"],
-                                    "meshrf": response["meshrf"],
+                                    "lat": response["lat"] if "lat" in response else None,
+                                    "lon": response["lon"] if "lon" in response else None,
+                                    "meshrf": response["meshrf"] if "meshrf" in response else None,
                                     "chanbw": response["chanbw"] if "chanbw" in response else None,
-                                    "node_details": response["node_details"],
-                                    "interfaces": response["interfaces"],
-                                    "link_info": [response["link_info"][key] for key in response["link_info"]],
+                                    "node_details": response["node_details"] if "node_details" in response else None,
+                                    "interfaces": response["interfaces"] if "interfaces" in response else None,
+                                    "link_info": [response["link_info"][key] for key in response["link_info"]] if "link_info" in response else None,
                                     "lqm": response["lqm"] if "lqm" in response else None,
                                 },
                             })
