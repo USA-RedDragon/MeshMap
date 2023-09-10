@@ -35,6 +35,8 @@ RUN apk add --virtual .build-deps gcc musl-dev libffi-dev openssl-dev python3-de
 
 RUN (crontab -l ; echo "30 * * * * python /app/walker/walk.py") | crontab -
 
+RUN touch /var/log/cron.log
+
 RUN <<__DOCKER_EOF__
 cat <<__EOF__ > /start
 #!/bin/sh
