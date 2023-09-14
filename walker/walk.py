@@ -38,6 +38,7 @@ class AsyncWalk:
     async def run(self):
         total_tasks = 1
         completed = 1
+        _non_mapped = 0
         all_seen = set()
         try:
             resp = await self._fetch(f"http://{self._starting_node}.local.mesh:8080/cgi-bin/sysinfo.json?hosts=1&link_info=1&lqm=1")
@@ -84,24 +85,27 @@ class AsyncWalk:
                                     "lqm": response["lqm"] if "lqm" in response else None,
                                 },
                             })
+                        elif "node" in response and response["node"]:
+                            _non_mapped += 1
                 except _ignored_exceptions as _:
                     continue
             self._tasks = list(tasks) + new_tasks
 
         print()
-        return self._data
+        return (self._data, _non_mapped)
 
     async def stop(self):
         await self._client.close()
 
 async def main():
     walk = AsyncWalk(starting_node="KI5VMF-CLOUD-TUNNEL-supernode")
-    node_info = await walk.run()
+    node_info, non_mapped = await walk.run()
     await walk.stop()
     print(f"Found {len(node_info)} nodes.")
     with open("/usr/share/nginx/html/data/out.json.new", "w") as f:
         json.dump({
             "nodeInfo": node_info,
+            "nonMapped": non_mapped,
             "date": datetime.datetime.utcnow().isoformat(),
         }, f)
     os.rename("/usr/share/nginx/html/data/out.json.new", "/usr/share/nginx/html/data/out.json")
