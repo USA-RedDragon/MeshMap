@@ -18,6 +18,7 @@ class App extends Component {
     appConfig: null,
     nodesData: [],
     lastUpdated: null,
+    nonMapped: 0,
     selected: 'all'
   }
 
@@ -96,7 +97,7 @@ class App extends Component {
           });
         }
       });
-      this.setState({ nodesData: nodesData, lastUpdated: stored.data.date });
+      this.setState({ nodesData: nodesData, nonMapped: stored.data.nonMapped, lastUpdated: stored.data.date });
       const date = new Date(stored.data.date);
       if ((new Date() - date) > 24 * 60 * 60 * 1000) {
         alertify.alert("Warning", "Node data was last updated on " + date.toLocaleString());
@@ -121,7 +122,7 @@ class App extends Component {
     }
     return (
       <div>
-        <Header nodesData={this.state.nodesData} appConfig={this.state.appConfig} lastUpdated={this.state.lastUpdated} selectNodes={selectNodes}/>
+        <Header nodesData={this.state.nodesData} nonMapped={this.state.nonMapped} appConfig={this.state.appConfig} lastUpdated={this.state.lastUpdated} selectNodes={selectNodes}/>
         <BaArednMap nodesData={this.state.nodesData} selected={this.state.selected} appConfig={this.state.appConfig}/>
       </div>
     );
