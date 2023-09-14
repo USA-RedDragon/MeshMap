@@ -43,7 +43,8 @@ class Header extends Component {
       b34: this.countNodes(this.props.nodesData, 34),
       b58: this.countNodes(this.props.nodesData, 58),
       off: this.countNodes(this.props.nodesData, 'off'),
-      all: this.countNodes(this.props.nodesData, 'all')
+      nonMapped: this.props.nonMapped,
+      all: this.countNodes(this.props.nodesData, 'all') + this.props.nonMapped,
     };
     return (
       <div className="Header">
@@ -82,6 +83,12 @@ class Header extends Component {
               counts.off ? <tr className={ 'off-' + this.state.selected }>
                 <td><a href="#" onClick={()=>this.selectNodes('off')}><Image src="./mesh_icon_75px_gray.png" width={20}></Image> No RF</a></td>
                 <td>{counts.off}</td>
+              </tr> : ""
+            }
+            {
+              counts.nonMapped ? <tr>
+                <td style={{paddingLeft:33}}>No Location</td>
+                <td>{counts.nonMapped}</td>
               </tr> : ""
             }
             <tr>
