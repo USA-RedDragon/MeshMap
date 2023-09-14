@@ -44,7 +44,7 @@ class Header extends Component {
       b58: this.countNodes(this.props.nodesData, 58),
       off: this.countNodes(this.props.nodesData, 'off'),
       nonMapped: this.props.nonMapped,
-      all: this.countNodes(this.props.nodesData, 'all') + this.props.nonMapped,
+      all: this.countNodes(this.props.nodesData, 'all') + (this.props.nonMapped || 0),
     };
     return (
       <div className="Header">
