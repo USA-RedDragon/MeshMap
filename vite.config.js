@@ -6,6 +6,6 @@ export default defineConfig({
   base: "",
   plugins: [react()],
   define: {
-    global: {},
+    _global: ({}),
   },
 })
