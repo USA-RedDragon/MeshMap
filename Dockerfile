@@ -37,6 +37,8 @@ RUN (crontab -l ; echo "30 * * * * python /app/walker/walk.py") | crontab -
 
 RUN touch /var/log/cron.log
 
+ENV PORT=80
+
 RUN <<__DOCKER_EOF__
 cat <<__EOF__ > /start
 #!/bin/sh
@@ -48,6 +50,8 @@ if [ ! -f /usr/share/nginx/html/data/out.json ]; then
 fi
 
 echo -n "\${APP_CONFIG}" > /usr/share/nginx/html/appConfig.json
+
+sed -i "s/listen       80;/listen       \${PORT};/g" /etc/nginx/conf.d/default.conf
 
 rsyslogd -n &
 crond -m off -s
