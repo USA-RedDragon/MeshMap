@@ -61,7 +61,7 @@ class AsyncWalk:
                 try:
                     response = await f
                     if response and "node" in response and response["node"]:
-                        for host in response["hosts"]:
+                        for host in (response["hosts"] if "hosts" in response else []):
                             if host['name'] not in all_seen:
                                 all_seen.add(host['name'])
                                 url = f"http://{host['name']}.local.mesh:8080/cgi-bin/sysinfo.json?hosts=1&link_info=1&lqm=1"
