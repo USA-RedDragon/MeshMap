@@ -71,6 +71,12 @@ class AsyncWalk:
                         if "lat" in response and "lon" in response and response["lat"] and response["lon"]:
                             if "link_info" not in response:
                                 response["link_info"] = {}
+
+                            if "node_details" in response and response["node_details"]["mesh_supernode"]:
+                                for key in response["link_info"]:
+                                    if response["link_info"][key]["linkType"] == "TUN":
+                                        response["link_info"][key]["linkType"] = "STUN"
+
                             self._data.append({
                                 "data": {
                                     "node": response["node"] if "node" in response else None,
