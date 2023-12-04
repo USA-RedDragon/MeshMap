@@ -104,7 +104,7 @@ class AsyncWalk:
         await self._client.close()
 
 async def main():
-    walk = AsyncWalk(starting_node="KI5VMF-CLOUD-TUNNEL-supernode")
+    walk = AsyncWalk(starting_node="KI5VMF-oklahoma-supernode")
     node_info, non_mapped = await walk.run()
     await walk.stop()
     print(f"Found {len(node_info)} nodes.")
