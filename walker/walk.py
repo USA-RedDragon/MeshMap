@@ -69,7 +69,7 @@ class AsyncWalk:
                                 total_tasks += 1
 
                         if "lat" in response and "lon" in response and response["lat"] and response["lon"]:
-                            if "link_info" not in response:
+                            if "link_info" not in response or not response["link_info"]:
                                 response["link_info"] = {}
 
                             if "node_details" in response and "mesh_supernode" in response["node_details"] and response["node_details"]["mesh_supernode"]:
