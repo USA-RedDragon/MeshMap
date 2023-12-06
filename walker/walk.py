@@ -9,38 +9,14 @@ from aiohttp_retry import RetryClient, RandomRetry
 from aiohttp.client_exceptions import ClientConnectionError, ClientConnectorError, ServerDisconnectedError, ClientResponseError, ClientPayloadError
 from aiohttp.http_exceptions import BadHttpMessage
 
-import cgroup_parser
 
 _ignored_exceptions = (ConnectionRefusedError, ClientConnectorError, ClientConnectionError, ClientPayloadError, ClientResponseError, BadHttpMessage, JSONDecodeError, asyncio.TimeoutError, ServerDisconnectedError, UnicodeDecodeError)
 
-class CPULoadConnector(aiohttp.TCPConnector):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._loop = asyncio.get_event_loop()
-
-    def _available_connections(self, key: "ConnectionKey") -> int:
-        # Check the CPU load vs the number of CPUs
-        # If the load is greater than the 85%, return 0
-
-        usage = cgroup_parser.get_cpu_usage()
-        if usage == -1:
-            # CPU load is not limited, use cgroup_parser.cpu_count() and os.getloadavg()
-            if os.getloadavg()[2] > cgroup_parser.cpu_count() * 0.85:
-                # CPU load is too high, return 0
-                return 0
-        else:
-            print(f"CPU usage: {usage}%")
-            if usage > 85:
-                # CGroup CPU load is too high, return 0
-                return 0
-        # CPU load is low enough or not limited, use super
-        return super()._available_connections(key)
-
 class AsyncWalk:
-    def __init__(self, starting_node, max_concurrency=1000, attempts=10, timeout_seconds=120):
+    def __init__(self, starting_node, max_concurrency=2000, attempts=10, timeout_seconds=120):
         self._client = RetryClient(
             client_session=aiohttp.ClientSession(
-                connector=CPULoadConnector(limit=max_concurrency, force_close=True),
+                connector=aiohttp.TCPConnector(limit=max_concurrency, force_close=True),
                 timeout=aiohttp.ClientTimeout(total=timeout_seconds),
                 headers={"User-Agent": "KI5VMF-MeshMap Walker (https://meshmap.aredn.mcswain.dev/)"},
             ),
