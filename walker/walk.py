@@ -37,7 +37,7 @@ class CPULoadConnector(aiohttp.TCPConnector):
         return super()._available_connections(key)
 
 class AsyncWalk:
-    def __init__(self, starting_node, max_concurrency=999999, attempts=10, timeout_seconds=600):
+    def __init__(self, starting_node, max_concurrency=1000, attempts=10, timeout_seconds=120):
         self._client = RetryClient(
             client_session=aiohttp.ClientSession(
                 connector=CPULoadConnector(limit=max_concurrency, force_close=True),
