@@ -98,20 +98,21 @@ class AsyncWalk:
             self._tasks = list(tasks) + new_tasks
 
         print()
-        return (self._data, _non_mapped)
+        return (self._data, _non_mapped, total_tasks)
 
     async def stop(self):
         await self._client.close()
 
 async def main():
     walk = AsyncWalk(starting_node="KI5VMF-oklahoma-supernode")
-    node_info, non_mapped = await walk.run()
+    node_info, non_mapped, total_scraped = await walk.run()
     await walk.stop()
     print(f"Found {len(node_info)} nodes.")
     with open("/usr/share/nginx/html/data/out.json.new", "w") as f:
         json.dump({
             "nodeInfo": node_info,
             "nonMapped": non_mapped,
+            "hostsScraped": total_scraped,
             "date": datetime.datetime.utcnow().isoformat(),
         }, f)
     os.rename("/usr/share/nginx/html/data/out.json.new", "/usr/share/nginx/html/data/out.json")
