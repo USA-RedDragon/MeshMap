@@ -47,6 +47,7 @@ class Header extends Component {
       supernode: this.countNodes(this.props.nodesData, 'supernode'),
       off: this.countNodes(this.props.nodesData, 'off'),
       nonMapped: this.props.nonMapped,
+      hostsScraped: this.props.hostsScraped,
       all: this.countNodes(this.props.nodesData, 'all') + (this.props.nonMapped || 0),
     };
     return (
@@ -104,6 +105,12 @@ class Header extends Component {
               <td style={{paddingLeft:33}}><a href="#" onClick={()=>this.selectNodes('all')}>Total</a></td>
               <td>{counts.all}</td>
             </tr>
+            {
+              counts.hostsScraped ? <tr>
+                <td style={{paddingLeft:33}}>Scraped Hosts</td>
+                <td>{counts.hostsScraped}</td>
+              </tr> : ""
+            }
           </tbody>
         </table>
         {
