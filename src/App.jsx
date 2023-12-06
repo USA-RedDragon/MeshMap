@@ -77,7 +77,7 @@ class App extends Component {
 
   async getStoredNodesData() {
     try {
-      const stored = await axios.get('data/out.json');
+      const stored = await axios.get('data/out.json?t=' + Date.now().toFixed(0));
       const nodesData = [];
       stored.data.nodeInfo.forEach(nodeInfo => {
         if ((nodeInfo.data.lat && nodeInfo.data.lon) || (nodeInfo.data.mlat && nodeInfo.data.mlon)) {
