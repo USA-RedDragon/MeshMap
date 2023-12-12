@@ -20,7 +20,7 @@
     "react-bootstrap": "^2.9.1",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
-    "vite": "^5.0.7"
+    "vite": "^5.0.8"
   },
   "scripts": {
     "start": "npm run dev",
