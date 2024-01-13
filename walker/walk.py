@@ -13,7 +13,7 @@ from aiohttp.http_exceptions import BadHttpMessage
 _ignored_exceptions = (ConnectionRefusedError, ClientConnectorError, ClientConnectionError, ClientPayloadError, ClientResponseError, BadHttpMessage, JSONDecodeError, asyncio.TimeoutError, ServerDisconnectedError, UnicodeDecodeError)
 
 class AsyncWalk:
-    def __init__(self, starting_node, max_concurrency=200, attempts=10, timeout_seconds=120):
+    def __init__(self, starting_node, max_concurrency=200, attempts=5, timeout_seconds=120):
         self._client = RetryClient(
             client_session=aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(limit=max_concurrency, force_close=True),
@@ -25,7 +25,7 @@ class AsyncWalk:
                 min_timeout=timeout_seconds,
                 max_timeout=timeout_seconds+10,
                 exceptions=_ignored_exceptions,
-                statuses=[i for i in range(205,300)] + [i for i in range(300,600)],
+                statuses=[i for i in range(205,300)] + [i for i in range(300,399)] + [i for i in range(405,600)],
             ),
         )
         self._starting_node = starting_node
