@@ -277,11 +277,14 @@ class BaArednMap extends Component {
                       <tbody>
                         <tr style={{verticalAlign:"top"}}><td>Description</td><td>{n.node_details.description}</td></tr>
                         <tr><td>Location</td><td>{n.lat},{n.lon}</td></tr>
+                        <tr><td>Height</td><td>{n.meshrf.height}</td></tr>
+                        <tr><td>Azimuth</td><td>{n.meshrf.azimuth}&deg;</td></tr>
+                        <tr><td>Elevation</td><td>{n.meshrf.elevation}&deg;</td></tr>
                         <tr><td>Last seen</td><td>
                         {
                           n.lastseen > todayStart ? "Today" :
                           n.lastseen > yesterdayStart ? "Yesterday" :
-                          n.lastseen > weekStart ? "The last 7 days" : "Ages ago"
+                          n.lastseen > weekStart ? "The last 7 days" : "More than a week ago"
                         }
                         </td></tr>
                         <tr><td>RF Status</td><td style={{textTransform: "capitalize"}}>{n.meshrf.status}</td></tr>
