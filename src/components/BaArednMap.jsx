@@ -269,7 +269,7 @@ class BaArednMap extends Component {
         { 
           Object.values(validnodes).map(n =>
             <div>
-              <AzimuthPointer azimuth={n.meshrf.azimuth} lat={n.lat} lon={n.lon} />
+              <AzimuthPointer azimuth={n.meshrf.azimuth} lat={n.mlat} lon={n.mlon} />
               <Marker ref={(el) => this.setMarkerRef(el, n.node.toUpperCase())} key={n.node} position={[n.mlat,n.mlon]} icon={ getIcon(n) }>
                 <Popup minWidth="240" maxWidth="380"> {
                   <div><h6>{mhref(n)}</h6>
