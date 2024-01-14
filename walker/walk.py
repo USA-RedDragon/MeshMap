@@ -25,7 +25,7 @@ class AsyncWalk:
                 min_timeout=timeout_seconds,
                 max_timeout=timeout_seconds+10,
                 exceptions=_ignored_exceptions,
-                statuses=[i for i in range(205,300)] + [i for i in range(300,399)] + [i for i in range(405,600)],
+                statuses=[i for i in range(500,600)],
             ),
         )
         self._starting_node = starting_node
