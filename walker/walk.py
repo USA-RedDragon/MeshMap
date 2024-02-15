@@ -75,8 +75,8 @@ class AsyncWalk:
 
                             if "node_details" in response and "mesh_supernode" in response["node_details"] and response["node_details"]["mesh_supernode"]:
                                 for key in response["link_info"]:
-                                    if response["link_info"][key]["linkType"] == "TUN":
-                                        response["link_info"][key]["linkType"] = "STUN"
+                                    if response["link_info"][key]["linkType"] == "TUN" || response["link_info"][key]["linkType"] == "WIREGUARD":
+                                        response["link_info"][key]["linkType"] = "SUPER"
 
                             self._data.append({
                                 "data": {
