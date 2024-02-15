@@ -14,7 +14,7 @@ COPY public/ /app/public/
 
 RUN npm run build
 
-FROM nginx:1.25.3-alpine
+FROM nginx:1.25.4-alpine
 
 WORKDIR /app
 
