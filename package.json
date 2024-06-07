@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@turf/turf": "^6.5.0",
+    "@turf/turf": "^7.0.0",
     "@types/react": "^18.3.3",
     "@vitejs/plugin-react": "^4.3.0",
     "alertifyjs": "^1.14.0",
