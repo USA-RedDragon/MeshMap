@@ -9,7 +9,7 @@
     "@types/react": "^18.3.3",
     "@vitejs/plugin-react": "^4.3.1",
     "alertifyjs": "^1.14.0",
-    "axios": "^1.7.2",
+    "axios": "^1.7.3",
     "bootstrap": "^5.3.3",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.35.0",
