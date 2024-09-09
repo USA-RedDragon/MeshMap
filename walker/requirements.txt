@@ -12,4 +12,4 @@ idna==3.8
 multidict==6.0.5
 pycares==4.4.0
 pycparser==2.22
-yarl==1.11.0
+yarl==1.11.1
