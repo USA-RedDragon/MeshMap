@@ -6,7 +6,7 @@
   "type": "module",
   "dependencies": {
     "@turf/turf": "^7.1.0",
-    "@types/react": "^18.3.10",
+    "@types/react": "^18.3.12",
     "@vitejs/plugin-react": "^4.3.2",
     "alertifyjs": "^1.14.0",
     "axios": "^1.7.7",
