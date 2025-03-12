@@ -23,7 +23,7 @@ const BlueIcon = new Icon({
 })
 
 const MagentaIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_purple.png",
+  iconUrl: "./mesh_icon_75px_magenta.png",
   iconSize: [25, 25],
 })
 
@@ -49,16 +49,13 @@ function getIcon(n){
   }
   const freq = rf.freq;
   if (freq) {
-    if(freq.indexOf("2") === 0) {
+    if (freq.startsWith("2")) {
       return PurpleIcon;
-    }
-    else if(freq.indexOf("5") === 0){
+    } else if (freq.startsWith("5")) {
       return OrangeIcon;
-    }
-    else if(freq.indexOf("3") === 0){
+    } else if (freq.startsWith("3")) {
       return BlueIcon;
-    }
-    else if (freq.indexOf("900") === 0){
+    } else if (freq.startsWith("9")) {
       return MagentaIcon;
     }
   }
