@@ -25,7 +25,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 RUN sed -i "s/#gzip  on;/gzip  on;\n    gzip_vary on;\n    gzip_types text\/plain text\/css application\/json application\/x-javascript application\/javascript text\/xml application\/xml application\/rss\+xml text\/javascript image\/svg\+xml application\/vnd\.ms-fontobject application\/x-font-ttf font\/opentype;/g" /etc/nginx/nginx.conf
 
-COPY --from=ghcr.io/usa-reddragon/mesh-walker:v0.0.0 /mesh-walker /usr/bin/mesh-walker
+COPY --from=ghcr.io/usa-reddragon/mesh-walker:v0.0.1 /mesh-walker /usr/bin/mesh-walker
 RUN (crontab -l ; echo "30 * * * * /usr/bin/mesh-walker") | crontab -
 
 RUN touch /var/log/cron.log
