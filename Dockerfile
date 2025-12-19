@@ -1,4 +1,4 @@
-FROM node:22.21.1-alpine as builder
+FROM node:22.21.1-alpine@sha256:0340fa682d72068edf603c305bfbc10e23219fb0e40df58d9ea4d6f33a9798bf as builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY public/ /app/public/
 
 RUN npm run build
 
-FROM nginx:1.29.4-alpine
+FROM nginx:1.29.4-alpine@sha256:8491795299c8e739b7fcc6285d531d9812ce2666e07bd3dd8db00020ad132295
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 RUN sed -i "s/#gzip  on;/gzip  on;\n    gzip_vary on;\n    gzip_types text\/plain text\/css application\/json application\/x-javascript application\/javascript text\/xml application\/xml application\/rss\+xml text\/javascript image\/svg\+xml application\/vnd\.ms-fontobject application\/x-font-ttf font\/opentype;/g" /etc/nginx/nginx.conf
 
-COPY --from=ghcr.io/usa-reddragon/mesh-walker:v0.0.1 /mesh-walker /usr/bin/mesh-walker
+COPY --from=ghcr.io/usa-reddragon/mesh-walker:v0.0.1@sha256:ffbf14141b106055e3d5a10068b40ca543ddbc4727fbb7633f91c6d470ebb3d0 /mesh-walker /usr/bin/mesh-walker
 RUN (crontab -l ; echo "30 * * * * /usr/bin/mesh-walker") | crontab -
 
 RUN touch /var/log/cron.log
