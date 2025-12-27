@@ -19,3 +19,15 @@ jobs:
     uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@01dfa5b8bca8336ab047d196c367ef4cc9025432 # v1.3.1
     with:
       push: ${{ github.event_name != 'pull_request' }}
+
+  docker-mesh-manager:
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@01dfa5b8bca8336ab047d196c367ef4cc9025432 # v1.3.1
+    with:
+      push: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/k8s' }}
+      version: mesh-manager
+      build-args: |
+        BASE=/meshmap/

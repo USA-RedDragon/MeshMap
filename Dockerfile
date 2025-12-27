@@ -11,7 +11,8 @@ COPY vite.config.js /app/
 COPY .env /app/
 COPY public/ /app/public/
 
-RUN npm run build
+ARG BASE=/
+RUN npm run build -- --base=${BASE}
 
 FROM nginx:1.29.4-alpine@sha256:8491795299c8e739b7fcc6285d531d9812ce2666e07bd3dd8db00020ad132295
 
