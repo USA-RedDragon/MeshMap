@@ -140,6 +140,11 @@ class BaArednMap extends Component {
       }
       const icon = getIcon(n);
       switch (this.props.selected) {
+        case 'halow':
+          if (icon !== HalowIcon) {
+            return;
+          }
+          break;
         case '900':
           if (icon !== MagentaIcon) {
             return;
