@@ -10,8 +10,10 @@ class Header extends Component {
 
   countNodes(nodesData, band) {
     switch(band) {
+      case 'halow':
+        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "9") && (n.meshrf.chanbw === 1 || n.meshrf.chanbw === 2 || n.meshrf.chanbw === 4 || n.meshrf.chanbw === 8 || n.meshrf.chanbw === "1" || n.meshrf.chanbw === "2" || n.meshrf.chanbw === "4" || n.meshrf.chanbw === "8"))).length;
       case 900:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "900")).length;
+        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "9") && !(n.meshrf.chanbw === 1 || n.meshrf.chanbw === 2 || n.meshrf.chanbw === 4 || n.meshrf.chanbw === 8 || n.meshrf.chanbw === "1" || n.meshrf.chanbw === "2" || n.meshrf.chanbw === "4" || n.meshrf.chanbw === "8"))).length;
       case 24:
         return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "2")).length;
       case 34:
@@ -24,7 +26,7 @@ class Header extends Component {
         return nodesData.filter(n => n.meshrf.status === "off").length;
       case 'all':
       default:
-        return this.countNodes(nodesData, 900) + this.countNodes(nodesData, 24) + this.countNodes(nodesData, 34) + this.countNodes(nodesData, 58) + this.countNodes(nodesData, 'off');
+        return this.countNodes(nodesData, 900) + this.countNodes(nodesData, 24) + this.countNodes(nodesData, 34) + this.countNodes(nodesData, 58) + this.countNodes(nodesData, 'halow') + this.countNodes(nodesData, 'off');
     }
   }
 
@@ -45,6 +47,7 @@ class Header extends Component {
       b24: this.countNodes(this.props.nodesData, 24),
       b34: this.countNodes(this.props.nodesData, 34),
       b58: this.countNodes(this.props.nodesData, 58),
+      halow: this.countNodes(this.props.nodesData, 'halow'),
       supernode: this.countNodes(this.props.nodesData, 'supernode'),
       off: this.countNodes(this.props.nodesData, 'off'),
       nonMapped: this.props.nonMapped,
@@ -61,8 +64,14 @@ class Header extends Component {
               <td>Nodes</td>
             </tr>
             {
+              counts.halow ? <tr className={ 'halow-' + this.state.selected }>
+                <td><a href="#" onClick={()=>this.selectNodes('halow')}><Image src="./mesh_icon_75px_halow.png" width={20}></Image> HaLow</a></td>
+                <td>{counts.halow}</td>
+              </tr> : ""
+            }
+            {
               counts.b900 ? <tr className={ 'b900-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('900')}><Image src="./mesh_icon_75px_purple.png" width={20}></Image> 900 MHz</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('900')}><Image src="./mesh_icon_75px_magenta.png" width={20}></Image> 900 MHz</a></td>
                 <td>{counts.b900}</td>
               </tr> : ""
             }

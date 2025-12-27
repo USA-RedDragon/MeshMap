@@ -28,6 +28,11 @@ const MagentaIcon = new Icon({
   iconSize: [25, 25],
 })
 
+const HalowIcon = new Icon({
+  iconUrl: "./mesh_icon_75px_halow.png",
+  iconSize: [25, 25],
+})
+
 const GrayIcon = new Icon({
   iconUrl: "./mesh_icon_75px_gray.png",
   iconSize: [25, 25],
@@ -57,6 +62,11 @@ function getIcon(n){
     } else if (freqStartsWith(freq, "3")) {
       return BlueIcon;
     } else if (freqStartsWith(freq, "9")) {
+      // check rf.chanbw == 1, 2, 4, or 8 MHz for halow, otherwise magenta. rf.chanbw can be string or number
+      const chanbw = typeof rf.chanbw === "number" ? rf.chanbw : parseInt(rf.chanbw);
+      if (chanbw === 1 || chanbw === 2 || chanbw === 4 || chanbw === 8) {
+        return HalowIcon;
+      }
       return MagentaIcon;
     }
   }
