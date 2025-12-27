@@ -108,6 +108,14 @@ html, body {
     const Color5 = 'darkorange';
     const Color24 = 'purple';
 
+    const freqStartsWith = (freq, prefix) => {
+      if (freq === undefined || freq === null) {
+        return false;
+      }
+      const value = typeof freq === 'number' ? freq.toString() : String(freq);
+      return value.startsWith(prefix);
+    }
+
     const radiosUrl = '/data/out.json?t=' + Date.now().toFixed(0);
     let loc = null;
     let radios = null;
@@ -185,10 +193,10 @@ html, body {
         const r = radioList[i];
         displayList.push(r);
         let color = ColorAll;
-        if (r.rf.freq.startsWith('5')) {
+        if (freqStartsWith(r.rf.freq, '5')) {
           color = Color5;
         }
-        else if (r.rf.freq.startsWith('2')) {
+        else if (freqStartsWith(r.rf.freq, '2')) {
           color = Color24;
         }
         L.polyline([[ loc.lat, loc.lng ], r.loc ], {

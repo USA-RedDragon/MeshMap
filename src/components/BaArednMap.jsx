@@ -6,6 +6,7 @@ import { Icon } from "leaflet";
 import hardware from "../hardware";
 import * as Turf from '@turf/turf';
 import AzimuthPointer from "./AzimuthPointer";
+import { freqStartsWith } from "../utils/freq";
 
 const PurpleIcon = new Icon({
   iconUrl: "./mesh_icon_75px_purple.png",
@@ -49,13 +50,13 @@ function getIcon(n){
   }
   const freq = rf.freq;
   if (freq) {
-    if (freq.startsWith("2")) {
+    if (freqStartsWith(freq, "2")) {
       return PurpleIcon;
-    } else if (freq.startsWith("5")) {
+    } else if (freqStartsWith(freq, "5")) {
       return OrangeIcon;
-    } else if (freq.startsWith("3")) {
+    } else if (freqStartsWith(freq, "3")) {
       return BlueIcon;
-    } else if (freq.startsWith("9")) {
+    } else if (freqStartsWith(freq, "9")) {
       return MagentaIcon;
     }
   }

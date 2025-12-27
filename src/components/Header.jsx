@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Image } from "react-bootstrap";
+import { freqStartsWith } from "../utils/freq";
 
 class Header extends Component {
 
@@ -10,13 +11,13 @@ class Header extends Component {
   countNodes(nodesData, band) {
     switch(band) {
       case 900:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && n.meshrf.freq.startsWith("900")).length;
+        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "900")).length;
       case 24:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && n.meshrf.freq.startsWith("2")).length;
+        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "2")).length;
       case 34:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && (n.meshrf.freq.startsWith("3") || (n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495))).length;
+        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "3") || (n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495))).length;
       case 58:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && n.meshrf.freq.startsWith("5") && !(n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495)).length;
+        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "5") && !(n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495)).length;
       case 'supernode':
         return nodesData.filter(n => n.node_details.mesh_supernode).length;
       case 'off':
