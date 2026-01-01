@@ -1,12 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 512 512">
-  <g stroke="#fff">
-    <circle class="background" cx="256" cy="256" r="239.351" stroke-width="33.297" fill="none"/>
-    <ellipse cx="256" cy="210.792" fill="#fff" stroke-width="37.293" rx="19.139" ry="19.027"/>
-    <path fill="#fff" stroke-width="7.991" d="M253.616 281.638v16.288h4.292v-16.288zm.614 74.321h3.065v-14.46h-3.066zm3.47 62.091v-16.69h-3.875v16.69z"/>
-    <path fill="#fff" stroke-width="7.991" d="M224.15 281.638 196.299 448.59h16.997l4.71-30.54h36.056v-16.69h-30.734l3.888-45.402h27.25v-14.46h-24.38l7.174-43.573h16.594v-16.288zm33.996 0v16.288h16.593l7.175 43.573h-24.381v14.46h27.25l3.888 45.402h-30.735v16.69h36.058l4.709 30.54h16.998l-27.852-166.953z"/>
-    <path fill="none" stroke-linecap="round" stroke-width="31.965" d="M322.135 159.43a60.762 72.637 0 0 1 17.797 51.362 60.762 72.637 0 0 1-17.797 51.362"/>
-    <path fill="none" stroke-linecap="round" stroke-width="25.06" d="M373.12 131.966a49.668 81.607 0 0 1 36.813 78.826 49.668 81.607 0 0 1-36.813 78.826"/>
-    <path fill="none" stroke-linecap="round" stroke-width="31.965" d="M189.506 159.43a60.762 72.637 0 0 0-17.796 51.362 60.762 72.637 0 0 0 17.796 51.362"/>
-    <path fill="none" stroke-linecap="round" stroke-width="25.347" d="M138.378 131.065a50.238 82.54 0 0 0-37.235 79.727 50.238 82.54 0 0 0 37.235 79.727"/>
+  <defs>
+    <clipPath id="clip">
+      <circle cx="256" cy="256" r="256"/>
+    </clipPath>
+  </defs>
+  <g stroke="#fff" clip-path="url(#clip)">
+    <circle class="background" cx="256" cy="256" r="256" stroke-width="40" fill="none"/>
+    <ellipse cx="256" cy="210" fill="#fff" stroke-width="37" rx="19" ry="19"/>
+    <path fill="#fff" stroke-width="8" d="M253.616 281.638v16.288h4.292v-16.288zm.614 74.321h3.065v-14.46h-3.066zm3.47 62.091v-16.69h-3.875v16.69z"/>
+    <path fill="#fff" stroke-width="8" d="M224.15 281.638 196.299 448.59h16.997l4.71-30.54h36.056v-16.69h-30.734l3.888-45.402h27.25v-14.46h-24.38l7.174-43.573h16.594v-16.288zm33.996 0v16.288h16.593l7.175 43.573h-24.381v14.46h27.25l3.888 45.402h-30.735v16.69h36.058l4.709 30.54h16.998l-27.852-166.953z"/>
+    <path fill="none" stroke-linecap="round" stroke-width="32" d="M322.135 159.43a60.762 72.637 0 0 1 17.797 51.362 60.762 72.637 0 0 1-17.797 51.362"/>
+    <path fill="none" stroke-linecap="round" stroke-width="25" d="M373.12 131.966a49.668 81.607 0 0 1 36.813 78.826 49.668 81.607 0 0 1-36.813 78.826"/>
+    <path fill="none" stroke-linecap="round" stroke-width="32" d="M189.506 159.43a60.762 72.637 0 0 0-17.796 51.362 60.762 72.637 0 0 0 17.796 51.362"/>
+    <path fill="none" stroke-linecap="round" stroke-width="25" d="M138.378 131.065a50.238 82.54 0 0 0-37.235 79.727 50.238 82.54 0 0 0 37.235 79.727"/>
   </g>
 </svg>

@@ -128,7 +128,6 @@ class Header extends Component {
           !this.props.lastUpdated ?
             <div className="footer">Last updated {(new Date().toLocaleString())}</div> :
             <div>
-              <div className="footer">Mesh map phone compass <a href="compass">here</a></div>
               <div className="footer">Last updated {(new Date(this.props.lastUpdated).toLocaleString())}</div>
             </div>
         }
