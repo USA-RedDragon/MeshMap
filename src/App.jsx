@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import React, { Component } from "react";
-import BaArednMap from "./components/BaArednMap"
+import MeshMap from "./components/MeshMap"
 import sysinfo from "./APIResources.json"
 import axios from "axios"
 import alertify from 'alertifyjs'
@@ -32,7 +32,6 @@ class App extends Component {
       if (nodeInfo.status === 200 && nodeInfo.data.lat && nodeInfo.data.lon) {
         const node = {
           node: nodeInfo.data.node,
-          lastseen: nodeInfo.data.lastseen,
           lat: nodeInfo.data.lat,
           lon: nodeInfo.data.lon,
           mlat: nodeInfo.data.lat,
@@ -73,7 +72,7 @@ class App extends Component {
       await this.getStoredNodesData()
     }
     catch (e) {
-      alertify.alert("Unable to find your AREDN node, please verify if you are connected to the MESH.");
+      alertify.alert("Unable to find your node, please verify if you are connected to the mesh.");
     }
   }
 
@@ -85,7 +84,6 @@ class App extends Component {
         if ((nodeInfo.data.lat && nodeInfo.data.lon) || (nodeInfo.data.mlat && nodeInfo.data.mlon)) {
           nodesData.push({
             node: nodeInfo.data.node,
-            lastseen: nodeInfo.data.lastseen,
             lat: nodeInfo.data.lat || nodeInfo.data.mlat,
             lon: nodeInfo.data.lon || nodeInfo.data.mlon,
             mlat: nodeInfo.data.mlat || nodeInfo.data.lat,
@@ -125,7 +123,7 @@ class App extends Component {
     return (
       <div>
         <Header nodesData={this.state.nodesData} nonMapped={this.state.nonMapped} hostsScraped={this.state.hostsScraped} appConfig={this.state.appConfig} lastUpdated={this.state.lastUpdated} selectNodes={selectNodes}/>
-        <BaArednMap nodesData={this.state.nodesData} selected={this.state.selected} appConfig={this.state.appConfig}/>
+        <MeshMap nodesData={this.state.nodesData} selected={this.state.selected} appConfig={this.state.appConfig}/>
       </div>
     );
   }

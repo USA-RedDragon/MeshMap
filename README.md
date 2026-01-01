@@ -15,14 +15,14 @@ Please follow this general steps to install:
 4. Copy the applications (which is now a simple group of static files) from the 'build' directory to your web server.
 
 # Configuration
-The application is configured by modifying the 'appConfig.json' file. The default configuraiton is for the Bay Area AREDN mesh.
+The application is configured by modifying the 'appConfig.json' file. The default configuraiton is for the Bay Area mesh.
 To change the configuration:
 
 1. Open 'public/appConfig.json'.
 2. Edit the settings. The defaults look something like this:
 ```
 {     
-    "name" : "BayArea AREDN",
+    "name" : "BayArea Mesh",
     "mapSettings": {
         "zoom": "10",
         "mapCenter": {

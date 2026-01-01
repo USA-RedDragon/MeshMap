@@ -55,7 +55,7 @@ function getIcon(n){
   return GrayIcon;
 }
 
-class BaArednMap extends Component {
+export default class MeshMap extends Component {
 
   constructor(props) {
     super(props);
@@ -287,13 +287,6 @@ class BaArednMap extends Component {
                         {!isNaN(n.meshrf.elevation) &&
                           <tr><td>Elevation</td><td>{n.meshrf.elevation}&deg;</td></tr>
                         }
-                        <tr><td>Last seen</td><td>
-                        {
-                          n.lastseen > todayStart ? "Today" :
-                          n.lastseen > yesterdayStart ? "Yesterday" :
-                          n.lastseen > weekStart ? "The last 7 days" : "More than a week ago"
-                        }
-                        </td></tr>
                         <tr><td>RF Status</td><td style={{textTransform: "capitalize"}}>{n.meshrf.status}</td></tr>
                         { n.meshrf.status === 'on' && <tbody>
                             <tr><td>SSID</td><td>{n.meshrf.ssid}</td></tr>
@@ -375,5 +368,3 @@ class BaArednMap extends Component {
     return hostname.replace(/^\./, '').replace(/\.local\.mesh$/i,'').toUpperCase()
   }
 }
-
-export default BaArednMap;
