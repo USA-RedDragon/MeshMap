@@ -9,7 +9,7 @@ module.exports = [
     js.configs.recommended,
     react.configs.flat.recommended,
     react.configs.flat["jsx-runtime"],
-    reactHooks.configs["recommended-latest"],
+    reactHooks.configs.flat.recommended,
     {
         files: ["**/*.{js,jsx}"],
         languageOptions: {
