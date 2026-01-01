@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-import React, { Component } from "react";
+import { Component } from "react";
 import MeshMap from "./components/MeshMap"
 import sysinfo from "./APIResources.json"
 import axios from "axios"
@@ -48,7 +48,8 @@ class App extends Component {
         this.setState({ nodesData: [ ...this.state.nodesData, node ] });
       }
     }
-    catch(_) {
+    catch(e) {
+      console.log("Unable to retrieve node details for " + node.name + ". Error: " + e.toString());
     }
   }
 
@@ -66,6 +67,7 @@ class App extends Component {
         return;
       }
       catch(e) {
+        console.log("Unable to retrieve nodes data from the mesh network, falling back to stored data. Error: " + e.toString());
       }
     }
     try {
