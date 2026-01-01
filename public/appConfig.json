@@ -1,7 +1,7 @@
 {     
     "name" : "BayArea AREDN",
     "mapSettings": {
-        "zoom": "10",
+        "zoom": 10,
         "mapCenter": {
             "node": "kn6plv-brkoxfla-arecibo",
             "lat": "37.7007",
