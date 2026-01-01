@@ -2,46 +2,28 @@
 
 import React, { Component } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
-import { Icon } from "leaflet";
+import { DivIcon } from "leaflet";
 import hardware from "../hardware";
 import * as Turf from '@turf/turf';
 import AzimuthPointer from "./AzimuthPointer";
 import { freqStartsWith } from "../utils/freq";
+import meshIconUrl from "../img/mesh_icon.svg";
 
-const PurpleIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_purple.png",
-  iconSize: [25, 25],
-})
+const createMeshIcon = (colorClass) => {
+  return new DivIcon({
+    className: `mesh-icon mesh-icon-${colorClass}`,
+    html: `<img src="${meshIconUrl}" class="mesh-icon-img" />`,
+    iconSize: [25, 25],
+  });
+}
 
-const OrangeIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_gold.png",
-  iconSize: [25, 25],
-})
-
-const BlueIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_blue.png",
-  iconSize: [25, 25],
-})
-
-const MagentaIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_magenta.png",
-  iconSize: [25, 25],
-})
-
-const HalowIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_halow.png",
-  iconSize: [25, 25],
-})
-
-const GrayIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_gray.png",
-  iconSize: [25, 25],
-})
-
-const GreenIcon = new Icon({
-  iconUrl: "./mesh_icon_75px_green.png",
-  iconSize: [25, 25],
-})
+const PurpleIcon = createMeshIcon('purple');
+const OrangeIcon = createMeshIcon('gold');
+const BlueIcon = createMeshIcon('blue');
+const MagentaIcon = createMeshIcon('magenta');
+const HalowIcon = createMeshIcon('teal');
+const GrayIcon = createMeshIcon('gray');
+const GreenIcon = createMeshIcon('green');
 
 // Function to get the Freq Icon
 function getIcon(n){

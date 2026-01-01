@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Image } from "react-bootstrap";
 import { freqStartsWith } from "../utils/freq";
+import meshIconUrl from "../img/mesh_icon.svg";
 
 class Header extends Component {
 
@@ -65,43 +66,43 @@ class Header extends Component {
             </tr>
             {
               counts.halow ? <tr className={ 'halow-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('halow')}><Image src="./mesh_icon_75px_halow.png" width={20}></Image> HaLow</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('halow')}><div className="mesh-icon mesh-icon-teal" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> HaLow</a></td>
                 <td>{counts.halow}</td>
               </tr> : ""
             }
             {
               counts.b900 ? <tr className={ 'b900-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('900')}><Image src="./mesh_icon_75px_magenta.png" width={20}></Image> 900 MHz</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('900')}><div className="mesh-icon mesh-icon-magenta" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 900 MHz</a></td>
                 <td>{counts.b900}</td>
               </tr> : ""
             }
             {
               counts.b24 ? <tr className={ 'b24-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('24')}><Image src="./mesh_icon_75px_purple.png" width={20}></Image> 2.4 GHz</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('24')}><div className="mesh-icon mesh-icon-purple" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 2.4 GHz</a></td>
                 <td>{counts.b24}</td>
               </tr> : ""
             }
             {
               counts.b34 ? <tr className={ 'b34-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('34')}><Image src="./mesh_icon_75px_blue.png" width={20}></Image> 3.4 GHz</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('34')}><div className="mesh-icon mesh-icon-blue" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 3.4 GHz</a></td>
                 <td>{counts.b34}</td>
               </tr> : ""
             }
             {
               counts.b58 ? <tr className={ 'b58-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('58')}><Image src="./mesh_icon_75px_gold.png" width={20}></Image> 5 GHz</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('58')}><div className="mesh-icon mesh-icon-gold" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 5 GHz</a></td>
                 <td>{counts.b58}</td>
               </tr> : ""
             }
             {
               counts.supernode ? <tr className={ 'supernode-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('supernode')}><Image src="./mesh_icon_75px_green.png" width={20}></Image> Supernode</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('supernode')}><div className="mesh-icon mesh-icon-green" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> Supernode</a></td>
                 <td>{counts.supernode}</td>
               </tr> : ""
             }
             {
               counts.off ? <tr className={ 'off-' + this.state.selected }>
-                <td><a href="#" onClick={()=>this.selectNodes('off')}><Image src="./mesh_icon_75px_gray.png" width={20}></Image> No RF</a></td>
+                <td><a href="#" onClick={()=>this.selectNodes('off')}><div className="mesh-icon mesh-icon-gray" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> No RF</a></td>
                 <td>{counts.off}</td>
               </tr> : ""
             }

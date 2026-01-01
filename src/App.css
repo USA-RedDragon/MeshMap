@@ -55,7 +55,6 @@ body {
 
 .Header img {
   position: relative;
-  top: -2px;
 }
 
 .halow-24, .halow-34, .halow-58, .halow-900, .halow-off, .halow-supernode,
@@ -82,3 +81,22 @@ body {
 .bearing {
   font-size: 9px
 }
+
+/* Mesh Icon Styles */
+.mesh-icon-marker {
+  border-radius: 50%;
+}
+
+.mesh-icon-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mesh-icon-purple { background-color: #810490; border-radius: 50%; }
+.mesh-icon-gold { background-color: #ff9742; border-radius: 50%; }
+.mesh-icon-blue { background-color: #0000f8; border-radius: 50%; }
+.mesh-icon-magenta { background-color: #c561ec; border-radius: 50%; }
+.mesh-icon-teal { background-color: #08b7b2; border-radius: 50%; }
+.mesh-icon-gray { background-color: #707070; border-radius: 50%; }
+.mesh-icon-green { background-color: #148406; border-radius: 50%; }
