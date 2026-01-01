@@ -73,7 +73,7 @@ class App extends Component {
     try {
       await this.getStoredNodesData()
     }
-    catch (e) {
+    catch {
       alertify.alert("Unable to find your node, please verify if you are connected to the mesh.");
     }
   }

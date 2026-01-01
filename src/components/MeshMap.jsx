@@ -103,7 +103,7 @@ export default class MeshMap extends Component {
             return tile.url;
           }
         }
-        catch (e) {
+        catch {
           return null;
         }
       })).then(urls => {
