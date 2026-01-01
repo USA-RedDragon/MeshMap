@@ -1,4 +1,5 @@
-import React, { Component } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 import { Marker } from "react-leaflet";
 import { Icon } from "leaflet";
 
@@ -23,4 +24,10 @@ class AzimuthPointer extends React.Component {
   }
 }
   
+AzimuthPointer.propTypes = {
+  azimuth: PropTypes.number,
+  lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  lon: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+};
+
 export default AzimuthPointer;

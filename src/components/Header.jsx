@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Image } from "react-bootstrap";
+import { Component } from "react";
+import PropTypes from "prop-types";
 import { freqStartsWith } from "../utils/freq";
 import meshIconUrl from "../img/mesh_icon.svg";
 
@@ -135,5 +135,14 @@ class Header extends Component {
     );
   }
 }
+
+Header.propTypes = {
+  appConfig: PropTypes.object,
+  nodesData: PropTypes.array,
+  nonMapped: PropTypes.number,
+  hostsScraped: PropTypes.number,
+  lastUpdated: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  selectNodes: PropTypes.func.isRequired,
+};
 
 export default Header;

@@ -1,6 +1,7 @@
 // @flow
 
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import { DivIcon } from "leaflet";
 import hardware from "../hardware";
@@ -56,6 +57,11 @@ function getIcon(n){
 }
 
 export default class MeshMap extends Component {
+  static propTypes = {
+    appConfig: PropTypes.object,
+    selected: PropTypes.string,
+    nodesData: PropTypes.array,
+  };
 
   constructor(props) {
     super(props);
@@ -78,30 +84,30 @@ export default class MeshMap extends Component {
     }
 
     if (!this.state.tile_url) {
-      new Promise(async () => {
-        const url = (await Promise.all(this.props.appConfig.mapSettings.servers.map(async tile => {
-          try {
-            if (tile.test) {
-              return await new Promise(resolve => {
-                const img = document.createElement("img");
-                img.onload = () => resolve(tile.url);
-                img.onerror = () => resolve(null);
-                img.src = tile.test;
-                setTimeout(() => {
-                  if (!img.complete) {
-                    resolve(null);
-                  }
-                }, 1000);
-              });
-            }
-            else {
-              return tile.url;
-            }
+      Promise.all(this.props.appConfig.mapSettings.servers.map(async tile => {
+        try {
+          if (tile.test) {
+            return await new Promise(resolve => {
+              const img = document.createElement("img");
+              img.onload = () => resolve(tile.url);
+              img.onerror = () => resolve(null);
+              img.src = tile.test;
+              setTimeout(() => {
+                if (!img.complete) {
+                  resolve(null);
+                }
+              }, 1000);
+            });
           }
-          catch (e) {
-            return null;
+          else {
+            return tile.url;
           }
-        }))).find(item => item);
+        }
+        catch (e) {
+          return null;
+        }
+      })).then(urls => {
+        const url = urls.find(item => item);
         this.setState({ tile_url: url });
       });
       return null;
@@ -179,7 +185,7 @@ export default class MeshMap extends Component {
             case 'WIREGUARD':
               tunconns.push(conn);
               break;
-            case 'DTD':
+            case 'DTD': {
               const dfrom = Turf.point([ n.lon, n.lat ]);
               const dto = Turf.point([ to.lon, to.lat ]);
               if (Turf.distance(dfrom, dto, { units: "meters" }) < 50) {
@@ -189,6 +195,7 @@ export default class MeshMap extends Component {
                 rfdtdconns.push(conn);
               }
               break;
+            }
             case 'XLINK':
               rfdtdconns.push(conn);
               break;
@@ -207,9 +214,6 @@ export default class MeshMap extends Component {
     const mhref = (n) => {
       return this.props.appConfig.active === false ? <a>{n.node}</a> : <a href={`http://${n.node}.local.mesh`} target="_blank" rel="noreferrer">{n.node}</a>
     }
-    const todayStart = new Date().setHours(0, 0, 0, 0) / 1000;
-    const yesterdayStart = todayStart - 24 * 60 * 60;
-    const weekStart = todayStart - 7 * 24 * 60 * 60;
     const mapCenter = [this.props.appConfig.mapSettings.mapCenter.lat, this.props.appConfig.mapSettings.mapCenter.lon];
     return (
       <MapContainer ref={this.mapRef} className="Map" center={mapCenter} zoom={this.props.appConfig.mapSettings.zoom} scrollWheelZoom={true}>
@@ -237,7 +241,7 @@ export default class MeshMap extends Component {
         }
         {
           stunconns.map(conn =>
-            <Polyline color="blue" weight="2" dashArray="5 5" positions={conn.pos}>
+            <Polyline color="blue" weight="2" dashArray="5 5" positions={conn.pos} key={conn.from + conn.to}>
               <Popup maxWidth="500">
                 <a href="#" onClick={()=>this.openPopup(conn.from)}>{conn.from}</a> &harr; <a href="#" onClick={()=>this.openPopup(conn.to)}>{conn.to}</a>
               </Popup>
@@ -264,7 +268,7 @@ export default class MeshMap extends Component {
         }
         { 
           Object.values(validnodes).map(n =>
-            <div>
+            <div key={n.node}>
               <AzimuthPointer azimuth={n.meshrf.azimuth} lat={n.mlat} lon={n.mlon} />
               <Marker ref={(el) => this.setMarkerRef(el, n.node.toUpperCase())} key={n.node} position={[n.mlat,n.mlon]} icon={ getIcon(n) }>
                 <Popup minWidth="240" maxWidth="380"> {
