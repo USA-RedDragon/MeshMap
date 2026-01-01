@@ -216,7 +216,16 @@ export default class MeshMap extends Component {
     }
     const mapCenter = [this.props.appConfig.mapSettings.mapCenter.lat, this.props.appConfig.mapSettings.mapCenter.lon];
     return (
-      <MapContainer ref={this.mapRef} className="Map" center={mapCenter} zoom={this.props.appConfig.mapSettings.zoom} scrollWheelZoom={true}>
+      <MapContainer 
+        ref={this.mapRef} 
+        className="Map" 
+        center={mapCenter} 
+        zoom={this.props.appConfig.mapSettings.zoom} 
+        scrollWheelZoom={true}
+        minZoom={3}
+        maxBounds={[[-90, -180], [90, 180]]}
+        maxBoundsViscosity={1.0}
+      >
         <TileLayer
           attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url={this.state.tile_url}
