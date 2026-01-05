@@ -12,19 +12,19 @@ class Header extends Component {
   countNodes(nodesData, band) {
     switch(band) {
       case 'halow':
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "9") && (n.meshrf.chanbw === 1 || n.meshrf.chanbw === 2 || n.meshrf.chanbw === 4 || n.meshrf.chanbw === 8 || n.meshrf.chanbw === "1" || n.meshrf.chanbw === "2" || n.meshrf.chanbw === "4" || n.meshrf.chanbw === "8"))).length;
+        return nodesData.filter(n => n.meshrf && n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "9") && (n.meshrf.chanbw === 1 || n.meshrf.chanbw === 2 || n.meshrf.chanbw === 4 || n.meshrf.chanbw === 8 || n.meshrf.chanbw === "1" || n.meshrf.chanbw === "2" || n.meshrf.chanbw === "4" || n.meshrf.chanbw === "8"))).length;
       case 900:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "9") && !(n.meshrf.chanbw === 1 || n.meshrf.chanbw === 2 || n.meshrf.chanbw === 4 || n.meshrf.chanbw === 8 || n.meshrf.chanbw === "1" || n.meshrf.chanbw === "2" || n.meshrf.chanbw === "4" || n.meshrf.chanbw === "8"))).length;
+        return nodesData.filter(n => n.meshrf && n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "9") && !(n.meshrf.chanbw === 1 || n.meshrf.chanbw === 2 || n.meshrf.chanbw === 4 || n.meshrf.chanbw === 8 || n.meshrf.chanbw === "1" || n.meshrf.chanbw === "2" || n.meshrf.chanbw === "4" || n.meshrf.chanbw === "8"))).length;
       case 24:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "2")).length;
+        return nodesData.filter(n => n.meshrf && n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "2")).length;
       case 34:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "3") || (n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495))).length;
+        return nodesData.filter(n => n.meshrf && n.meshrf.freq && n.meshrf.status === "on" && (freqStartsWith(n.meshrf.freq, "3") || (n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495))).length;
       case 58:
-        return nodesData.filter(n => n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "5") && !(n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495)).length;
+        return nodesData.filter(n => n.meshrf && n.meshrf.freq && n.meshrf.status === "on" && freqStartsWith(n.meshrf.freq, "5") && !(n.meshrf.channel >= 3380 && n.meshrf.channel <= 3495)).length;
       case 'supernode':
-        return nodesData.filter(n => n.node_details.mesh_supernode).length;
+        return nodesData.filter(n => n.node_details && n.node_details.mesh_supernode).length;
       case 'off':
-        return nodesData.filter(n => n.meshrf.status === "off").length;
+        return nodesData.filter(n => n.meshrf && n.meshrf.status === "off").length;
       case 'all':
       default:
         return this.countNodes(nodesData, 900) + this.countNodes(nodesData, 24) + this.countNodes(nodesData, 34) + this.countNodes(nodesData, 58) + this.countNodes(nodesData, 'halow') + this.countNodes(nodesData, 'off');

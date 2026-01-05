@@ -63,10 +63,13 @@ const getColor = (value, min, max, reverse) => {
 
 // Function to get the Freq Icon
 function getIcon(n){
-  if (n.node_details.mesh_supernode) {
+  if (n.node_details && n.node_details.mesh_supernode) {
     return GreenIcon;
   }
   const rf = n.meshrf;
+  if (!rf) {
+    return GrayIcon;
+  }
   const chan = parseInt(rf.channel);
   if (chan >= 3380 && chan <= 3495) {
     return BlueIcon;
@@ -568,30 +571,30 @@ export default class MeshMap extends Component {
         { 
           Object.values(validnodes).map(n =>
             <div key={n.node}>
-              <AzimuthPointer azimuth={n.meshrf.azimuth} lat={n.mlat} lon={n.mlon} />
+              {n.meshrf && <AzimuthPointer azimuth={n.meshrf.azimuth} lat={n.mlat} lon={n.mlon} />}
               <Marker ref={(el) => this.setMarkerRef(el, n.node.toUpperCase())} key={n.node} position={[n.mlat,n.mlon]} icon={ getIcon(n) }>
                 <Popup minWidth="240" maxWidth="380"> {
                   <div><h6>{mhref(n)}</h6>
                     <table>
                       <tbody>
-                        {n.node_details.description &&
+                        {n.node_details && n.node_details.description &&
                           <tr style={{verticalAlign:"top"}}><td>Description</td><td>{n.node_details.description.replace("&deg;", "\u00B0")}</td></tr>
                         }
                         <tr><td>Location</td><td>{n.lat},{n.lon}</td></tr>
-                        {n.meshrf.antenna && n.meshrf.antenna.description &&
+                        {n.meshrf && n.meshrf.antenna && n.meshrf.antenna.description &&
                           <tr style={{verticalAlign:"top"}}><td>Antenna</td><td>{n.meshrf.antenna.description.replace("&deg;", "\u00B0")}</td></tr>
                         }
-                        {!isNaN(n.meshrf.height) && 
+                        {n.meshrf && !isNaN(n.meshrf.height) && 
                         <tr><td>Height</td><td>{n.meshrf.height} m</td></tr>
                         }
-                        {!isNaN(n.meshrf.azimuth) &&
+                        {n.meshrf && !isNaN(n.meshrf.azimuth) &&
                           <tr><td>Azimuth</td><td>{n.meshrf.azimuth}&deg;</td></tr>
                         }
-                        {!isNaN(n.meshrf.elevation) &&
+                        {n.meshrf && !isNaN(n.meshrf.elevation) &&
                           <tr><td>Elevation</td><td>{n.meshrf.elevation}&deg;</td></tr>
                         }
-                        <tr><td>RF Status</td><td style={{textTransform: "capitalize"}}>{n.meshrf.status}</td></tr>
-                        { n.meshrf.status === 'on' && <tbody>
+                        {n.meshrf && <tr><td>RF Status</td><td style={{textTransform: "capitalize"}}>{n.meshrf.status}</td></tr>}
+                        { n.meshrf && n.meshrf.status === 'on' && <tbody>
                             <tr><td>SSID</td><td>{n.meshrf.ssid}</td></tr>
                             <tr style={{verticalAlign:"top"}}><td>Channel</td><td>{n.meshrf.channel}</td></tr>
                             <tr><td>Frequency</td><td>{n.meshrf.freq}</td></tr>
@@ -600,8 +603,8 @@ export default class MeshMap extends Component {
                             <tr><td>MAC</td><td>{n.interfaces[0].mac}</td></tr>
                             </tbody>
                         }
-                        <tr style={{verticalAlign:"top"}}><td>Hardware</td><td>{hardware(n.node_details.board_id) || n.node_details.model}</td></tr>
-                        <tr><td width="80">Firmware</td><td>{n.node_details.firmware_version}</td></tr>
+                        {n.node_details && <tr style={{verticalAlign:"top"}}><td>Hardware</td><td>{hardware(n.node_details.board_id) || n.node_details.model}</td></tr>}
+                        {n.node_details && <tr><td width="80">Firmware</td><td>{n.node_details.firmware_version}</td></tr>}
                         <tr style={{verticalAlign:"top",whiteSpace:"nowrap"}}><td>Neighbors</td><td> {
                           n.link_info.map(m => {
                             const cname = this.canonicalHostname(n.node);
