@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@turf/turf": "7.3.2",
+    "@turf/turf": "7.3.3",
     "alertifyjs": "1.14.0",
     "axios": "1.13.4",
     "bootstrap": "5.3.8",
