@@ -600,7 +600,7 @@ export default class MeshMap extends Component {
                             <tr><td>Frequency</td><td>{n.meshrf.freq}</td></tr>
                             <tr><td>Bandwidth</td><td>{n.meshrf.chanbw} MHz</td></tr>
                             <tr><td>LQM</td><td>{n.lqm && n.lqm.enabled ? 'Enabled' : n.lqm ? 'Disabled' : 'Unavailable'}</td></tr>
-                            <tr><td>MAC</td><td>{n.interfaces[0].mac}</td></tr>
+                            <tr><td>MAC</td><td>{n.interfaces && n.interfaces[0] && n.interfaces[0].mac ? n.interfaces[0].mac : 'N/A'}</td></tr>
                             </tbody>
                         }
                         {n.node_details && <tr style={{verticalAlign:"top"}}><td>Hardware</td><td>{hardware(n.node_details.board_id) || n.node_details.model}</td></tr>}
