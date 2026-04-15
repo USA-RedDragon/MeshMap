@@ -14,7 +14,7 @@ COPY public/ /app/public/
 ARG BASE=/
 RUN npm run build -- --base=${BASE}
 
-FROM nginx:1.30.0-alpine@sha256:bf593fe2f307f7e423e44aacd870e7e327f60a41f09db349ae3d328c918a77c2
+FROM nginx:1.30.0-alpine@sha256:2e665dfdd34c48b5a4dec0cf06496743f922a27ca1339273464a3badf916c0ae
 
 WORKDIR /app
 
