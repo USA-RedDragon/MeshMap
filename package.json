@@ -7,7 +7,7 @@
   "dependencies": {
     "@turf/turf": "7.4.0",
     "alertifyjs": "1.14.0",
-    "axios": "1.19.0",
+    "axios": "1.20.0",
     "bootstrap": "5.3.8",
     "leaflet": "1.9.4",
     "leaflet-rotatedmarker": "0.2.0",
