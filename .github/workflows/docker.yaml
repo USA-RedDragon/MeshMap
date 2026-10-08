@@ -16,7 +16,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@7b48c49fab12ac02ffeed216028183415bf5aebe # v2.0.24
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@86546533e7fe42b748a54ea123c6aa4e3e812241 # v2.0.31
     with:
       push: ${{ github.event_name != 'pull_request' }}
 
@@ -25,7 +25,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@7b48c49fab12ac02ffeed216028183415bf5aebe # v2.0.24
+    uses: USA-RedDragon/reusable-actions/.github/workflows/docker-ci.yaml@86546533e7fe42b748a54ea123c6aa4e3e812241 # v2.0.31
     with:
       push: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/k8s' }}
       image-name: usa-reddragon/meshmap-mesh-manager
