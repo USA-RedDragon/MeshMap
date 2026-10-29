@@ -1,134 +1,124 @@
-// @flow
-
-import "leaflet/dist/leaflet.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-import { Component } from "react";
-import MeshMap from "./components/MeshMap"
-import sysinfo from "./APIResources.json"
-import axios from "axios"
-import alertify from 'alertifyjs'
-import "alertifyjs/build/css/themes/default.min.css"
-import "alertifyjs/build/css/alertify.min.css"
-import Header from './components/Header'
-import "leaflet-rotatedmarker";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import MeshMap from "./components/MeshMap";
+import sysinfo from "./APIResources.json";
+import axios from "axios";
+import alertify from "alertifyjs";
+import "alertifyjs/build/css/themes/default.min.css";
+import "alertifyjs/build/css/alertify.min.css";
+import Header from "./components/Header";
+import { mark } from "./lib/marks";
+import { toNode } from "./lib/meshData";
+import { EMPTY_MESH, loadMesh, meshFromNodes } from "./lib/meshStore";
+import { COMPACT_QUERY, NARROW_QUERY, useMediaQuery } from "./hooks/useMediaQuery";
 
-class App extends Component {
+/** DEFAULT_DATA_URL is the mesh data file, relative to the page, when appConfig.json names none. */
+const DEFAULT_DATA_URL = "data/out.json";
 
-  state = {
-    appConfig: null,
-    nodesData: [],
-    lastUpdated: null,
-    nonMapped: 0,
-    hostsScraped: 0,
-    selected: 'all'
-  }
+/** dataUrlOf is the URL of the mesh data file, with a cache buster unless appConfig.json turns it off. */
+function dataUrlOf(appConfig) {
+  const url = appConfig.dataUrl || DEFAULT_DATA_URL;
+  if (appConfig.dataCacheBuster === false) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}t=${Date.now().toFixed(0)}`;
+}
 
-  // Get the details from the node. Recieves the name of the node.
-  async retrieveNodeDetails(node)
-  {
-    try {
-      const nodeInfo = await axios.get(`http://${node.name}.local.mesh:8080${sysinfo.resource}?${sysinfo.params.link_info}&${sysinfo.params.lqm}`)
-      if (nodeInfo.status === 200 && nodeInfo.data.lat && nodeInfo.data.lon) {
-        const node = {
-          node: nodeInfo.data.node,
-          lat: nodeInfo.data.lat,
-          lon: nodeInfo.data.lon,
-          mlat: nodeInfo.data.lat,
-          mlon: nodeInfo.data.lon,
-          meshrf : nodeInfo.data.meshrf,
-          chanbw: nodeInfo.data.chanbw,
-          node_details: nodeInfo.data.node_details,
-          interfaces: nodeInfo.data.interfaces,
-          link_info: Object.keys(nodeInfo.data.link_info || {}).map((key) => nodeInfo.data.link_info[key]),
-          lqm: nodeInfo.data.lqm
-        };
-
-        //  Add this node to the state
-        this.setState({ nodesData: [ ...this.state.nodesData, node ] });
-      }
+async function loadStored(appConfig, setData) {
+  try {
+    const meta = await loadMesh(dataUrlOf(appConfig), (mesh) => setData((d) => ({ ...d, mesh })));
+    setData((d) => ({ ...d, nonMapped: meta.nonMapped, hostsScraped: meta.hostsScraped, lastUpdated: meta.date }));
+    const date = new Date(meta.date);
+    if (new Date() - date > 24 * 60 * 60 * 1000) {
+      alertify.alert("Warning", "Node data was last updated on " + date.toLocaleString());
     }
-    catch(e) {
-      console.log("Unable to retrieve node details for " + node.name + ". Error: " + e.toString());
-    }
-  }
-
-  async getNodesData() {
-    if (!this.state.appConfig.offline) {
-      try {
-        // Get the list of nodes / hosts before to retrieve the nodes information.
-        const start = this.state.appConfig.mapSettings.mapCenter.node || "localnode";
-        const nodes =  await axios.get(`http://${start}.local.mesh:8080${sysinfo.resource}${sysinfo.params.hosts}`)
-        // Get only the ones that matches the format CALLSIGN-CITY-COUNTRY-TYPE#NODENUMBER
-        const regex = new RegExp(this.state.appConfig.nodesFilter);
-        const filteredNodeList = nodes.data.hosts.filter(h => h.name.toUpperCase().trim().match(regex))
-        // Iterate thru each node to get the details.
-        Object.keys(filteredNodeList).forEach(key => this.retrieveNodeDetails(filteredNodeList[key]));
-        return;
-      }
-      catch(e) {
-        console.log("Unable to retrieve nodes data from the mesh network, falling back to stored data. Error: " + e.toString());
-      }
-    }
-    try {
-      await this.getStoredNodesData()
-    }
-    catch {
-      alertify.alert("Unable to find your node, please verify if you are connected to the mesh.");
-    }
-  }
-
-  async getStoredNodesData() {
-    try {
-      const stored = await axios.get('data/out.json?t=' + Date.now().toFixed(0));
-      const nodesData = [];
-      stored.data.nodeInfo.forEach(nodeInfo => {
-        if ((nodeInfo.data.lat && nodeInfo.data.lon) || (nodeInfo.data.mlat && nodeInfo.data.mlon)) {
-          nodesData.push({
-            node: nodeInfo.data.node,
-            lat: nodeInfo.data.lat || nodeInfo.data.mlat,
-            lon: nodeInfo.data.lon || nodeInfo.data.mlon,
-            mlat: nodeInfo.data.mlat || nodeInfo.data.lat,
-            mlon: nodeInfo.data.mlon || nodeInfo.data.lon,
-            meshrf : nodeInfo.data.meshrf,
-            chanbw: nodeInfo.data.chanbw,
-            node_details: nodeInfo.data.node_details,
-            interfaces: nodeInfo.data.interfaces,
-            link_info: Object.keys(nodeInfo.data.link_info || {}).map((key) => nodeInfo.data.link_info[key]),
-            lqm: nodeInfo.data.lqm
-          });
-        }
-      });
-      this.setState({ nodesData: nodesData, nonMapped: stored.data.nonMapped, hostsScraped: stored.data.hostsScraped, lastUpdated: stored.data.date });
-      const date = new Date(stored.data.date);
-      if ((new Date() - date) > 24 * 60 * 60 * 1000) {
-        alertify.alert("Warning", "Node data was last updated on " + date.toLocaleString());
-      }
-    }
-    catch (e) {
-      alertify.alert(e.toString());
-    }
-  }
-
-  async componentDidMount() {
-    const appConfig = await axios.get('appConfig.json')
-    this.setState({appConfig: appConfig.data}, () => {
-      document.title = `${this.state.appConfig.contactInfo.callsign} - ${import.meta.env.VITE_APP_NAME} ${import.meta.env.VITE_APP_VERSION} by ${import.meta.env.VITE_APP_CREATOR}`;
-      this.getNodesData();
-    })
-  }
-
-  render() {
-    const selectNodes = (type) => {
-      this.setState({ selected: type });
-    }
-    return (
-      <div>
-        <Header nodesData={this.state.nodesData} nonMapped={this.state.nonMapped} hostsScraped={this.state.hostsScraped} appConfig={this.state.appConfig} lastUpdated={this.state.lastUpdated} selectNodes={selectNodes}/>
-        <MeshMap nodesData={this.state.nodesData} selected={this.state.selected} appConfig={this.state.appConfig}/>
-      </div>
-    );
+  } catch (e) {
+    alertify.alert(e.toString());
   }
 }
 
-export default App;
+async function crawl(appConfig, addNode) {
+  const start = appConfig.mapSettings.mapCenter.node || "localnode";
+  const nodes = await axios.get(`http://${start}.local.mesh:8080${sysinfo.resource}${sysinfo.params.hosts}`);
+  const regex = new RegExp(appConfig.nodesFilter);
+  const filtered = nodes.data.hosts.filter((h) => h.name.toUpperCase().trim().match(regex));
+  filtered.forEach(async (host) => {
+    try {
+      const info = await axios.get(`http://${host.name}.local.mesh:8080${sysinfo.resource}?${sysinfo.params.link_info}&${sysinfo.params.lqm}`);
+      if (info.status === 200 && info.data.lat && info.data.lon) {
+        addNode(toNode({ ...info.data, mlat: info.data.lat, mlon: info.data.lon }));
+      }
+    } catch (e) {
+      console.log("Unable to retrieve node details for " + host.name + ". Error: " + e.toString());
+    }
+  });
+}
+
+export default function App() {
+  const [appConfig, setAppConfig] = useState(null);
+  const [data, setData] = useState({ mesh: EMPTY_MESH, nonMapped: 0, hostsScraped: 0, lastUpdated: null });
+  const [crawled, setCrawled] = useState([]);
+  const [selected, setSelected] = useState("all");
+  const compact = useMediaQuery(COMPACT_QUERY);
+  const narrow = useMediaQuery(NARROW_QUERY);
+  const [legendOpen, setLegendOpenState] = useState(true);
+  const [panelOpen, setPanelOpenState] = useState(() => !window.matchMedia(NARROW_QUERY).matches);
+
+  const setLegendOpen = useCallback((open) => {
+    setLegendOpenState(open);
+    if (open && narrow) setPanelOpenState(false);
+  }, [narrow]);
+  const setPanelOpen = useCallback((open) => {
+    setPanelOpenState(open);
+    if (open && narrow) setLegendOpenState(false);
+  }, [narrow]);
+
+  const crawledMesh = useMemo(() => (crawled.length ? meshFromNodes(crawled) : null), [crawled]);
+  const mesh = crawledMesh || data.mesh;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await axios.get("appConfig.json");
+      if (cancelled) return;
+      const config = res.data;
+      mark("config");
+      setAppConfig(config);
+      document.title = `${config.contactInfo.callsign} - ${import.meta.env.VITE_APP_NAME} ${import.meta.env.VITE_APP_VERSION} by ${import.meta.env.VITE_APP_CREATOR}`;
+      if (!config.offline) {
+        try {
+          await crawl(config, (node) => !cancelled && setCrawled((list) => [...list, node]));
+          return;
+        } catch (e) {
+          console.log("Unable to retrieve nodes data from the mesh network, falling back to stored data. Error: " + e.toString());
+        }
+      }
+      try {
+        await loadStored(config, (d) => !cancelled && setData(d));
+      } catch {
+        alertify.alert("Unable to find your node, please verify if you are connected to the mesh.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <div>
+      {!compact && (
+        <Header
+          counts={mesh.counts}
+          nonMapped={data.nonMapped}
+          hostsScraped={data.hostsScraped}
+          appConfig={appConfig}
+          lastUpdated={data.lastUpdated}
+          selectNodes={setSelected}
+          selected={selected}
+          open={legendOpen}
+          setOpen={setLegendOpen}
+        />
+      )}
+      <MeshMap appConfig={appConfig} mesh={mesh} selected={selected} compact={compact} panelOpen={panelOpen} setPanelOpen={setPanelOpen} />
+    </div>
+  );
+}

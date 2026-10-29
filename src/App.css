@@ -68,8 +68,16 @@ body {
   color: grey;
 }
 
-.Map {
+.map-wrap {
+  position: relative;
+  width: 100%;
   height: 100vh;
+  height: 100dvh;
+}
+
+.map-wrap > .Map {
+  position: absolute;
+  inset: 0;
   z-index: 1;
 }
 
@@ -100,3 +108,256 @@ body {
 .mesh-icon-teal { background-color: #08b7b2; border-radius: 50%; }
 .mesh-icon-gray { background-color: #707070; border-radius: 50%; }
 .mesh-icon-green { background-color: #148406; border-radius: 50%; }
+
+/* Panels */
+.panel-toggle {
+  font-size: 13px;
+  line-height: 1.2;
+  padding: 4px 10px;
+  border: 1px solid grey;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  color: inherit;
+  cursor: pointer;
+}
+
+.panel-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 1px 8px;
+  font-size: 11px;
+}
+
+.Header .title {
+  white-space: nowrap;
+  padding-right: 52px;
+}
+
+.map-controls:not(.collapsed) {
+  padding-right: 60px;
+}
+
+.Header.collapsed,
+.map-controls.collapsed {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.Header.collapsed .panel-toggle {
+  font-weight: bold;
+}
+
+.map-controls {
+  position: absolute;
+  top: 10px;
+  left: 50px;
+  z-index: 2;
+  max-width: calc(100% - 60px);
+  background-color: white;
+  padding: 10px;
+  color: black;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  font-size: 15px;
+}
+
+.map-controls select {
+  max-width: 100%;
+}
+
+.metric-ramp {
+  display: inline-block;
+  width: 100px;
+  height: 10px;
+  margin: 0 5px;
+}
+
+.theme-toggle {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border: 1px solid grey;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.Header {
+  max-width: calc(100% - 20px);
+  max-height: calc(100% - 20px);
+  overflow: auto;
+}
+
+.map-failure {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  z-index: 3;
+  margin: 0;
+  max-width: 90%;
+  padding: 6px 12px;
+  border: 1px solid grey;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
+  font-size: 13px;
+}
+
+/* Popups, sized like the Leaflet ones they replace */
+.maplibregl-popup-content {
+  font-size: 13px;
+  line-height: 1.3;
+  padding: 13px 24px 13px 20px;
+  border-radius: 12px;
+  color: #333;
+}
+
+.maplibregl-popup-close-button {
+  font-size: 18px;
+  padding: 0 6px;
+}
+
+.node-popup {
+  min-width: 240px;
+}
+
+.node-popup td {
+  padding-right: 6px;
+}
+
+.link-popup-title {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+.link-popup table {
+  width: 100%;
+  font-size: 0.9em;
+  border-collapse: collapse;
+}
+
+.link-popup th,
+.link-popup td {
+  padding: 2px;
+  text-align: right;
+  border-bottom: 1px solid #eee;
+}
+
+.link-popup td:first-child {
+  text-align: left;
+}
+
+.maplibregl-popup-content a {
+  color: #0078a8;
+}
+
+/* The position a node page asked for in the URL, marked on its small map tile */
+.url-spot {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e0245e;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+/* Compact: the small map tile of the AREDN node pages shows nodes and links only */
+.compact .maplibregl-ctrl-top-left {
+  display: none;
+}
+
+.map-wrap:not(.compact) .url-spot {
+  display: none;
+}
+
+/* Dark theme */
+.dark .Header {
+  color: #e8e8e8;
+  background-color: rgba(28, 30, 34, 0.75);
+  border-color: #555;
+}
+
+.dark .Header.collapsed {
+  background: none;
+}
+
+.dark .map-controls:not(.collapsed) {
+  background-color: #24272c;
+  color: #e8e8e8;
+}
+
+.dark .panel-toggle {
+  background: rgba(36, 39, 44, 0.9);
+  color: #e8e8e8;
+}
+
+.dark .map-controls select {
+  background: #1b1d21;
+  color: #e8e8e8;
+  border-color: #555;
+}
+
+.dark .map-failure {
+  background: rgba(36, 39, 44, 0.9);
+  color: #e8e8e8;
+}
+
+.dark .maplibregl-popup-content {
+  background: #24272c;
+  color: #e8e8e8;
+}
+
+.dark .maplibregl-popup-content a {
+  color: #8ab4f8;
+}
+
+.dark .maplibregl-popup-close-button {
+  color: #e8e8e8;
+}
+
+.dark .maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.dark .maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.dark .maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: #24272c;
+}
+
+.dark .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.dark .maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.dark .maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: #24272c;
+}
+
+.dark .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: #24272c;
+}
+
+.dark .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: #24272c;
+}
+
+.dark .link-popup th,
+.dark .link-popup td,
+.dark .link-popup-title {
+  border-color: #3a3d42;
+}
+
+.dark .maplibregl-ctrl-group {
+  background: #2b2e33;
+}
+
+.dark .maplibregl-ctrl-group button + button {
+  border-top-color: #444;
+}
+
+.dark .maplibregl-ctrl-group .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
