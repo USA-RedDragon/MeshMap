@@ -3,6 +3,8 @@ import { bearingDegrees, distanceMiles } from "../lib/geo";
 import hardware from "../hardware";
 import { canonicalHostname } from "../lib/meshData";
 
+const decodeEntities = (s) => new DOMParser().parseFromString(`<!doctype html><body>${s}`, "text/html").body.textContent;
+
 const present = (v) => v !== null && v !== undefined && v !== "" && !isNaN(v);
 
 const neighborInfo = (n, m, hn) => {
@@ -34,11 +36,11 @@ export default function NodePopup({ node: n, byName, active, openNode }) {
       <table>
         <tbody>
           {n.node_details && n.node_details.description && (
-            <tr style={{ verticalAlign: "top" }}><td>Description</td><td>{n.node_details.description.replace("&deg;", "°")}</td></tr>
+            <tr style={{ verticalAlign: "top" }}><td>Description</td><td style={{ whiteSpace: "pre-line" }}>{decodeEntities(n.node_details.description)}</td></tr>
           )}
           <tr><td>Location</td><td>{n.lat},{n.lon}</td></tr>
           {rf && rf.antenna && rf.antenna.description && (
-            <tr style={{ verticalAlign: "top" }}><td>Antenna</td><td>{rf.antenna.description.replace("&deg;", "°")}</td></tr>
+            <tr style={{ verticalAlign: "top" }}><td>Antenna</td><td>{decodeEntities(rf.antenna.description)}</td></tr>
           )}
           {rf && present(rf.height) && <tr><td>Height</td><td>{rf.height} m</td></tr>}
           {rf && present(rf.azimuth) && <tr><td>Azimuth</td><td>{rf.azimuth}&deg;</td></tr>}
