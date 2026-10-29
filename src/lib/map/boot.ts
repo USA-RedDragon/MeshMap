@@ -126,7 +126,17 @@ export function startBoot(container: HTMLElement): Boot {
     }
     m.touchZoomRotate.disableRotation();
     m.keyboard.disableRotation();
-    m.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: basemap.kind === 'raster' ? RASTER_ATTRIBUTION : BASEMAP_ATTRIBUTION }), 'bottom-right');
+    const attribution = new maplibregl.AttributionControl({ compact: true, customAttribution: basemap.kind === 'raster' ? RASTER_ATTRIBUTION : BASEMAP_ATTRIBUTION });
+    // MapLibre opens the compact attribution the first time it fills in and keeps it open until the first drag,
+    // which covers most of a small embed. Start it collapsed behind the "i" button instead.
+    const ctl = attribution as unknown as { _container: HTMLElement; _updateCompact: () => void };
+    const updateCompact = ctl._updateCompact;
+    ctl._updateCompact = () => {
+      const wasCompact = ctl._container.classList.contains('maplibregl-compact');
+      updateCompact();
+      if (!wasCompact) ctl._container.classList.remove('maplibregl-compact-show');
+    };
+    m.addControl(attribution, 'bottom-right');
     if (fromUrl) {
       const spot = document.createElement('div');
       spot.className = 'url-spot';
