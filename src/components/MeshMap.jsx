@@ -56,16 +56,25 @@ function applyMesh(m, mesh, applied) {
   if (!prev || prev.key !== mesh.key) {
     m.getSource(SRC_LINKS).setData(collection(mesh.features.links));
     m.getSource(SRC_ARROWS).setData(collection(mesh.features.arrows));
-    m.getSource(SRC_NODES).setData(collection(mesh.features.nodes));
+    nodesDone(m.getSource(SRC_NODES).setData(collection(mesh.features.nodes), true), mesh, applied);
   } else {
     for (const d of mesh.batches.slice(prev.version, mesh.version)) {
       if (d.links.length || d.linkUpdates.length) m.getSource(SRC_LINKS).updateData({ add: d.links, update: d.linkUpdates });
       if (d.arrows.length) m.getSource(SRC_ARROWS).updateData({ add: d.arrows });
-      if (d.nodes.length) m.getSource(SRC_NODES).updateData({ add: d.nodes });
+      if (d.nodes.length) nodesDone(m.getSource(SRC_NODES).updateData({ add: d.nodes }), mesh, applied);
     }
   }
   applied.mesh = mesh;
-  if (PERF) m.triggerRepaint();
+  if (PERF && mesh.complete) nodesDone(Promise.resolve(), mesh, applied);
+}
+
+/** nodesDone notes, for benchmarks, the node count the map's worker holds once an update lands. */
+function nodesDone(update, mesh, applied) {
+  if (!PERF) return;
+  Promise.resolve(update).then(() => {
+    if (!applied.landed || applied.landed.nodeCount <= mesh.nodeCount) applied.landed = { nodeCount: mesh.nodeCount, complete: mesh.complete };
+    applied.repaint?.();
+  });
 }
 
 /** ensureLayers adds the mesh images, sources and layers when the style lacks them, as after a theme switch. */
@@ -79,6 +88,7 @@ function ensureLayers(m, v, applied) {
   m.addSource(SRC_ARROWS, { type: "geojson", data: collection(v.mesh.features.arrows) });
   m.addSource(SRC_NODES, { type: "geojson", data: collection(v.mesh.features.nodes) });
   applied.mesh = v.mesh;
+  nodesDone(Promise.resolve(), v.mesh, applied);
   for (const t of LINK_TYPES) {
     m.addLayer({
       id: linkLayerId(t),
@@ -244,7 +254,9 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
         p.setDOMContent(popupBox);
         p.on("close", () => setPopup(null));
         popupRef.current = p;
-        m.on("styledata", () => ensureLayers(m, view.current, applied.current));
+        // The mesh layers go in once the basemap has loaded, so streaming nodes never hold up the basemap's load.
+        let loaded = false;
+        m.on("styledata", () => loaded && ensureLayers(m, view.current, applied.current));
         m.on("click", (e) => {
           if (view.current.compact) return;
           const pt = e.point;
@@ -275,8 +287,8 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
           window.__meshDrawn = [];
           m.once("load", () => mark("basemap-drawn"));
           m.on("render", () => {
-            const a = applied.current.mesh;
-            if (!a || !a.nodeCount || !m.getSource(SRC_NODES) || !m.isSourceLoaded(SRC_NODES)) return;
+            const a = applied.current.landed;
+            if (!a || !a.nodeCount) return;
             const now = `${a.nodeCount}/${a.complete}`;
             if (now === lastDrawn) return;
             if (!lastDrawn) mark("first-node-drawn");
@@ -292,7 +304,9 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
           const nextStyle = await mapStyle(next, view.current.isDark);
           if (!cancelled) m.setStyle(nextStyle);
         });
+        applied.current.repaint = () => m.triggerRepaint();
         m.once("load", () => {
+          loaded = true;
           mark("load");
           el.current?.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
           ensureLayers(m, view.current, applied.current);
