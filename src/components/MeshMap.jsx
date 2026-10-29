@@ -74,6 +74,12 @@ function nodesDone(update, mesh, applied) {
   });
 }
 
+const NO_FADE = { duration: 0, delay: 0 };
+const HIDDEN = {
+  line: { "line-opacity": 0, "line-opacity-transition": NO_FADE },
+  icon: { "icon-opacity": 0, "icon-opacity-transition": NO_FADE },
+};
+
 /** ensureLayers adds the mesh images, sources and layers when the style lacks them, as after a theme switch. */
 function ensureLayers(m, v, applied) {
   if (!v.images || !v.mesh) return;
@@ -93,7 +99,7 @@ function ensureLayers(m, v, applied) {
       source: SRC_LINKS,
       filter: linkFilter(t, v.selected),
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": lineColor(t.color, v.metric, v.direction), "line-width": t.width, ...(t.dash ? { "line-dasharray": t.dash } : {}) },
+      paint: { ...HIDDEN.line, "line-color": lineColor(t.color, v.metric, v.direction), "line-width": t.width, ...(t.dash ? { "line-dasharray": t.dash } : {}) },
     });
   }
   const icon = { "icon-allow-overlap": true, "icon-ignore-placement": true };
@@ -102,13 +108,21 @@ function ensureLayers(m, v, applied) {
     type: "symbol",
     source: SRC_ARROWS,
     layout: { ...icon, "icon-image": "arrow", "icon-rotate": ["get", "rot"], "icon-rotation-alignment": "map" },
+    paint: HIDDEN.icon,
   }, bandFilter(v.selected)));
   m.addLayer(withFilter({
     id: NODE_LAYER,
     type: "symbol",
     source: SRC_NODES,
     layout: { ...icon, "icon-image": ["concat", "node-", ["get", "band"]] },
+    paint: HIDDEN.icon,
   }, bandFilter(v.selected)));
+  // Links and icons come from separate sources that finish at different times, so all of them stay transparent
+  // until the map is idle and then appear in the same frame.
+  m.once("idle", () => {
+    for (const t of LINK_TYPES) if (m.getLayer(linkLayerId(t))) m.setPaintProperty(linkLayerId(t), "line-opacity", 1);
+    for (const id of [ARROW_LAYER, NODE_LAYER]) if (m.getLayer(id)) m.setPaintProperty(id, "icon-opacity", 1);
+  });
 }
 
 function MapControls({ metric, direction, setMetric, setDirection, modeLabel, cycleMode, open, setOpen }) {
