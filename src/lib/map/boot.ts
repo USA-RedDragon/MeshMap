@@ -16,17 +16,17 @@ export type Booted = {
 };
 
 /**
- * Boot is what the page starts first. config is the current appConfig.json; map is the map; styled settles when its first style has loaded; loaded settles when the
- * basemap in view has drawn; firstFrame settles once the first basemap tiles are on screen, or when the map fails or
- * takes too long, and is when the rest of the app may start loading. stored is the stored mesh data, once the page
- * has started loading it.
+ * Boot is what the page starts first. config is the current appConfig.json; map is the map; loaded settles when the
+ * basemap in view has loaded, and complete when it is also drawn and the map is idle. firstFrame settles once the
+ * first basemap tiles are on screen, or when the map fails or takes too long. stored is the stored mesh data, once
+ * the page has started loading it.
  */
 export type Boot = {
   container: HTMLElement;
   config: Promise<AppConfig>;
   map: Promise<Booted>;
-  styled: Promise<void>;
   loaded: Promise<void>;
+  complete: Promise<void>;
   firstFrame: Promise<void>;
   stored?: Promise<unknown>;
 };
@@ -148,13 +148,22 @@ export function startBoot(container: HTMLElement): Boot {
     return { maplibregl, map: m, basemap, changed, dark };
   })();
 
-  const styled = map.then(({ map: m }) => new Promise<void>((resolve) => m.once('style.load', () => resolve())));
   const loaded = map.then(
     ({ map: m }) =>
       new Promise<void>((resolve) => {
         m.once('load', () => {
           mark('basemap-drawn');
           mark('load');
+          resolve();
+        });
+      }),
+  );
+  // The basemap of the first view, fully drawn: every tile in view loaded and on screen.
+  const complete = map.then(
+    ({ map: m }) =>
+      new Promise<void>((resolve) => {
+        m.once('idle', () => {
+          mark('basemap-complete');
           resolve();
         });
       }),
@@ -180,5 +189,5 @@ export function startBoot(container: HTMLElement): Boot {
       m.on('data', onData);
     }, done);
   });
-  return { container, config, map, styled, loaded, firstFrame };
+  return { container, config, map, loaded, complete, firstFrame };
 }

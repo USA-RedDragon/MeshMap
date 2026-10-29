@@ -244,7 +244,7 @@ export default function MeshMap({ boot, appConfig, mesh, selected, compact, pane
           setPopup(null);
         });
         popupRef.current = p;
-        // The mesh layers go in once the basemap style has loaded; the mesh data itself starts after the first basemap tiles draw.
+        // The mesh layers go in only once the basemap of the first view is fully drawn, so no node ever shows on a half-drawn map.
         let loaded = false;
         const layersReady = () => loaded && ensureLayers(m, view.current, applied.current);
         meshImages().then((images) => {
@@ -304,14 +304,14 @@ export default function MeshMap({ boot, appConfig, mesh, selected, compact, pane
           if (!cancelled) m.setStyle(nextStyle);
         });
         applied.current.repaint = () => m.triggerRepaint();
-        const styleReady = () => {
+        const basemapDrawn = () => {
           if (cancelled) return;
           loaded = true;
           el.current?.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
           layersReady();
           setMap(m);
         };
-        boot.styled.then(styleReady);
+        boot.complete.then(basemapDrawn);
         detach = () => {
           offs.forEach((off) => off());
           m.removeControl(nav);
