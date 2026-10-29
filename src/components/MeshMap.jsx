@@ -195,6 +195,7 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
   const applied = useRef({ mesh: null, dark: null });
   const basemap = useRef(null);
   const popupRef = useRef(null);
+  const opening = useRef(null);
 
   useEffect(() => {
     view.current = { ...view.current, mesh, selected, metric, direction, isDark, compact };
@@ -252,7 +253,10 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
         }
         const p = new maplibregl.Popup({ closeOnClick: false, maxWidth: "380px", focusAfterOpen: false });
         p.setDOMContent(popupBox);
-        p.on("close", () => setPopup(null));
+        p.on("close", () => {
+          opening.current = null;
+          setPopup(null);
+        });
         popupRef.current = p;
         // The mesh layers go in once the basemap has loaded, so streaming nodes never hold up the basemap's load.
         let loaded = false;
@@ -269,10 +273,12 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
           const box = [[pt.x - LINK_HIT_PX, pt.y - LINK_HIT_PX], [pt.x + LINK_HIT_PX, pt.y + LINK_HIT_PX]];
           const links = layers.length ? m.queryRenderedFeatures(box, { layers }) : [];
           if (!links.length) {
+            opening.current = null;
             setPopup(null);
             return;
           }
           const lngLat = [e.lngLat.lng, e.lngLat.lat];
+          opening.current = null;
           view.current.mesh.getLink(links[0].properties.id).then((conn) => setPopup(conn ? { kind: "link", conn, lngLat } : null), () => setPopup(null));
         });
         m.on("mouseenter", [NODE_LAYER, ...LINK_LAYERS], () => {
@@ -374,9 +380,11 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
   }, [map, shown, popupAt?.[0], popupAt?.[1]]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openNode = useCallback((name) => {
-    view.current.mesh.getNode(name).then((model) => {
-      if (model) setPopup({ kind: "node", name, model });
-    }, () => undefined);
+    opening.current = name;
+    const show = (model) => {
+      if (model && opening.current === name) setPopup({ kind: "node", name, model });
+    };
+    view.current.mesh.getNode(name, show).then(show, () => undefined);
   }, []);
   const openNodeRef = useRef(openNode);
 

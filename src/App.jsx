@@ -16,16 +16,23 @@ import { COMPACT_QUERY, NARROW_QUERY, useMediaQuery } from "./hooks/useMediaQuer
 /** DEFAULT_DATA_URL is the mesh data file, relative to the page, when appConfig.json names none. */
 const DEFAULT_DATA_URL = "data/out.json";
 
-/** dataUrlOf is the URL of the mesh data file, with a cache buster unless appConfig.json turns it off. */
-function dataUrlOf(appConfig) {
-  const url = appConfig.dataUrl || DEFAULT_DATA_URL;
+/** DEFAULT_MAP_DATA_URL is the walker's slim map file, read before the full data file. */
+const DEFAULT_MAP_DATA_URL = "data/map.json";
+
+/** busted is url with a cache buster unless appConfig.json turns it off. */
+function busted(appConfig, url) {
   if (appConfig.dataCacheBuster === false) return url;
   return `${url}${url.includes("?") ? "&" : "?"}t=${Date.now().toFixed(0)}`;
 }
 
 async function loadStored(appConfig, setData) {
   try {
-    const meta = await loadMesh(dataUrlOf(appConfig), (mesh) => setData((d) => ({ ...d, mesh })));
+    const urls = {
+      url: busted(appConfig, appConfig.dataUrl || DEFAULT_DATA_URL),
+      mapUrl: appConfig.mapDataUrl === false ? undefined : busted(appConfig, appConfig.mapDataUrl || DEFAULT_MAP_DATA_URL),
+      detailsUrl: appConfig.detailsUrl,
+    };
+    const meta = await loadMesh(urls, (mesh) => setData((d) => ({ ...d, mesh })));
     setData((d) => ({ ...d, nonMapped: meta.nonMapped, hostsScraped: meta.hostsScraped, lastUpdated: meta.date }));
     const date = new Date(meta.date);
     if (new Date() - date > 24 * 60 * 60 * 1000) {

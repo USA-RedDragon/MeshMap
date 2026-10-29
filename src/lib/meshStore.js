@@ -45,8 +45,12 @@ export function meshFromNodes(nodes) {
 
 export const EMPTY_MESH = meshFromNodes([]);
 
-/** loadMesh streams url through a worker, calls onMesh with the mesh after every batch, and resolves to the crawl's metadata. */
-export function loadMesh(url, onMesh) {
+/**
+ * loadMesh loads the walker's map.json from mapUrl through a worker, or streams the crawl file at url when there is
+ * no map.json. It calls onMesh with the mesh after every batch and resolves to the crawl's metadata. With map.json,
+ * getNode(name, onUpdate) calls onUpdate with what map.json has and resolves once the node's full record is read.
+ */
+export function loadMesh({ url, mapUrl, detailsUrl }, onMesh) {
   const worker = new Worker(new URL("./meshWorker.js", import.meta.url), { type: "module" });
   const waiting = new Map();
   let next = 0;
@@ -67,9 +71,10 @@ export function loadMesh(url, onMesh) {
     if (data.ok) w.resolve(data.value);
     else w.reject(new Error(data.error));
   };
-  const c = collector((name) => ask({ type: "node", name }), (id) => ask({ type: "link", link: id }));
+  const c = collector((name, onUpdate) => ask({ type: "node", name }, onUpdate), (id) => ask({ type: "link", link: id }));
   let first = true;
-  return ask({ type: "load", url: new URL(url, document.baseURI).href }, ({ diff, counts, nodeCount }) => {
+  const abs = (u) => (u ? new URL(u, document.baseURI).href : undefined);
+  return ask({ type: "load", url: abs(url), mapUrl: abs(mapUrl), detailsUrl: abs(detailsUrl) }, ({ diff, counts, nodeCount }) => {
     c.add(diff, counts, nodeCount);
     if (first) mark("first-batch");
     first = false;

@@ -1,12 +1,17 @@
-// Fetches, parses and indexes the mesh data off the main thread, as it streams in. The page gets slim GeoJSON for
-// the map in batches and asks for the full records of one node or link when a popup opens.
+// Fetches, parses and indexes the mesh data off the main thread. It reads the walker's slim map.json when there is
+// one, and otherwise streams the crawl file. The page gets slim GeoJSON for the map in batches and asks for the full
+// records of one node or link when a popup opens.
 
-import { MeshBuilder, linkPopupModel, nodePopupModel, nodesFromStored } from "./meshData";
+import { MeshBuilder, linkPopupModel, nodePopupModel, nodesFromStored, toNode } from "./meshData";
+import { nodesFromMap, shardOf } from "./mapFile";
 
 /** BATCH_MS is how long the worker collects nodes before it sends them to the page. */
 const BATCH_MS = 75;
 
 let mesh = new MeshBuilder();
+
+/** details says where the full node records are when the mesh came from map.json, and caches the shards read. */
+let details = null;
 
 const located = ({ data }) => data && ((data.lat && data.lon) || (data.mlat && data.mlon));
 
@@ -99,7 +104,64 @@ function send(id, diff) {
   self.postMessage({ id, ok: true, partial: true, value: { diff, counts: { ...mesh.counts }, nodeCount: mesh.nodeCount } });
 }
 
-async function load(id, url) {
+/** loadMap reads the walker's map.json, or returns null when there is none to read. */
+async function loadMap(id, mapUrl, detailsUrl) {
+  let m;
+  try {
+    const res = await fetch(mapUrl);
+    if (!res.ok) return null;
+    m = await res.json();
+  } catch {
+    return null;
+  }
+  if (!m || m.version !== 1 || !Array.isArray(m.nodes)) return null;
+  const timings = { origin: performance.timeOrigin };
+  mesh = new MeshBuilder();
+  details = {
+    base: new URL(m.details, detailsUrl ? new URL(detailsUrl, mapUrl) : mapUrl).href,
+    shards: m.shards,
+    cache: new Map(),
+  };
+  send(id, mesh.add(nodesFromMap(m)));
+  timings.firstNode = timings.done = performance.now();
+  return { meta: { nonMapped: m.nonMapped, hostsScraped: m.hostsScraped, date: m.date }, timings, streamed: false, slim: true };
+}
+
+/** shard fetches the detail file of a node name once, and resolves to its records. */
+function shard(name) {
+  const i = shardOf(name, details.shards);
+  if (!details.cache.has(i)) {
+    const url = new URL(`${i.toString(16).padStart(2, "0")}.json`, details.base);
+    const p = fetch(url).then((res) => {
+      if (!res.ok) throw new Error(`The node details answered ${res.status}`);
+      return res.json();
+    });
+    p.catch(() => details.cache.delete(i));
+    details.cache.set(i, p);
+  }
+  return details.cache.get(i);
+}
+
+/** nodeModel answers a node popup. With map.json it sends what that file has first, then the full record. */
+async function nodeModel(id, name) {
+  const entry = mesh.byName[name];
+  if (!entry || !entry.slim || !details) return nodePopupModel(mesh, name);
+  self.postMessage({ id, ok: true, partial: true, value: nodePopupModel(mesh, name) });
+  try {
+    const full = (await shard(name))[name];
+    if (full) Object.assign(entry, toNode(full), { slim: false });
+  } catch {
+    // The popup keeps what map.json had.
+  }
+  return nodePopupModel(mesh, name);
+}
+
+async function load(id, url, mapUrl, detailsUrl) {
+  if (mapUrl) {
+    const loaded = await loadMap(id, mapUrl, detailsUrl);
+    if (loaded) return loaded;
+  }
+  details = null;
   mesh = new MeshBuilder();
   const res = await fetch(url);
   if (!res.ok) throw new Error(`The mesh data answered ${res.status}`);
@@ -136,9 +198,9 @@ async function load(id, url) {
 self.onmessage = async ({ data: msg }) => {
   try {
     if (msg.type === "load") {
-      self.postMessage({ id: msg.id, ok: true, value: await load(msg.id, msg.url) });
+      self.postMessage({ id: msg.id, ok: true, value: await load(msg.id, msg.url, msg.mapUrl, msg.detailsUrl) });
     } else if (msg.type === "node") {
-      self.postMessage({ id: msg.id, ok: true, value: nodePopupModel(mesh, msg.name) });
+      self.postMessage({ id: msg.id, ok: true, value: await nodeModel(msg.id, msg.name) });
     } else if (msg.type === "link") {
       self.postMessage({ id: msg.id, ok: true, value: linkPopupModel(mesh, msg.link) });
     }

@@ -51,7 +51,9 @@ The map draws the mesh with MapLibre over a vector basemap. These optional setti
 - `mapSettings.basemaps`: the basemap archives to try, in order. Each entry is either a base URL that serves `status/latest.json` and the archive parts it names (the layout of `https://tiles.squallar.app`), or a direct `.pmtiles` URL. The first one that answers is used. A base that has not answered within `mapSettings.basemapTimeoutMs` (default 3000) gives way to a later one that has. Default: `["https://tiles.squallar.app"]`.
 - `mapSettings.servers`: the older raster tile servers. They are used only when no basemap archive answers.
 - `dataUrl`: the mesh data file, relative to the page. Default: `data/out.json`.
-- `dataCacheBuster`: set to `false` to stop adding `?t=<time>` to the data URL, for servers that send their own caching headers. Default: `true`.
+- `mapDataUrl`: the slim map file that mesh-walker writes next to `out.json`, relative to the page. The page reads it first and draws from it; it falls back to `dataUrl` when the file is missing or not valid. A node popup shows what the map file has at once, then reads the node's full record from its detail file. Set to `false` to always read `dataUrl`. Default: `data/map.json`.
+- `detailsUrl`: the base URL that the detail directory named in the map file is relative to. Default: the URL of the map file.
+- `dataCacheBuster`: set to `false` to stop adding `?t=<time>` to the data URLs, for servers that send their own caching headers. Default: `true`.
 
 Example for a mesh server:
 ```
@@ -60,9 +62,12 @@ Example for a mesh server:
     "mapCenter": { "node": "KP4DJT-HAP", "lat": "35.4704", "lon": "-97.5147" },
     "basemaps": ["http://KI5VMF-KUBERNETES.local.mesh/tiles", "https://tiles.squallar.app"]
 },
+"mapDataUrl": "/cgi-bin/meshmap-data/map.json",
 "dataUrl": "data/out.json",
 "dataCacheBuster": false
 ```
+
+mesh-walker writes the detail files gzip-compressed only (`<shard>.json.gz`), so the server must send them with `Content-Encoding: gzip` when the page asks for `<shard>.json`. The meshmap package does this with a CGI script; nginx can use `gzip_static always`. The map file format is described in the mesh-walker README.
 
 The `zoom` in `mapSettings` is a Leaflet zoom, as before. The page URL can also give a position, as AREDN's world map does: `#<zoom>/<lat>/<lon>` (MapLibre zoom), `#<lat>/<lon>`, or `?lat=&lon=&zoom=`. Without a zoom the map opens at zoom 12. When the page is small (the map tile on a node status page), it shows only the nodes and links.
 
