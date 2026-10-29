@@ -102,9 +102,12 @@ const HIDDEN = {
 /** ensureLayers adds the mesh images, sources and layers when the style lacks them, as after a theme switch. */
 function ensureLayers(m, v, applied) {
   if (!v.images || !v.mesh) return;
+  const fresh = applied.images !== v.images;
   for (const [id, img] of Object.entries(v.images)) {
     if (!m.hasImage(id)) m.addImage(id, img.data, { pixelRatio: img.pixelRatio });
+    else if (fresh) m.updateImage(id, img.data);
   }
+  applied.images = v.images;
   if (m.getSource(SRC_LINKS)) return;
   m.addSource(SRC_LINKS, { type: "geojson", data: collection(v.mesh.features.links) });
   m.addSource(SRC_ARROWS, { type: "geojson", data: collection(v.mesh.features.arrows) });
@@ -281,7 +284,7 @@ export default function MeshMap({ boot, appConfig, mesh, selected, compact, pane
         // The mesh layers go in only once the basemap of the first view is fully drawn, so no node ever shows on a half-drawn map.
         let loaded = false;
         const layersReady = () => loaded && ensureLayers(m, view.current, applied.current);
-        meshImages().then((images) => {
+        meshImages(view.current.isDark).then((images) => {
           if (cancelled) return;
           view.current.images = images;
           layersReady();
@@ -395,8 +398,11 @@ export default function MeshMap({ boot, appConfig, mesh, selected, compact, pane
     if (!map || !basemap.current || applied.current.dark === isDark) return undefined;
     let stale = false;
     applied.current.dark = isDark;
-    mapStyle(basemap.current, isDark).then((style) => {
-      if (!stale) map.setStyle(style);
+    // The icons' outline follows the theme, so the new style gets the matching icons.
+    Promise.all([mapStyle(basemap.current, isDark), meshImages(isDark)]).then(([style, images]) => {
+      if (stale) return;
+      view.current.images = images;
+      map.setStyle(style);
     });
     return () => {
       stale = true;

@@ -2,9 +2,17 @@ import { Component } from "react";
 import PropTypes from "prop-types";
 import { BANDS } from "../lib/meshData";
 import { meshIconUrl } from "../lib/meshImages";
+import { useColorMode } from "../hooks/useColorMode";
 
 const LEGEND_PX = 20;
-const legendIcon = (band) => <img className="mesh-icon" src={meshIconUrl(BANDS[band].color, LEGEND_PX)} width={LEGEND_PX} height={LEGEND_PX} alt="" />;
+
+function LegendIcon({ band }) {
+  const { isDark } = useColorMode();
+  return <img className="mesh-icon" src={meshIconUrl(BANDS[band].color, LEGEND_PX, isDark)} width={LEGEND_PX} height={LEGEND_PX} alt="" />;
+}
+LegendIcon.propTypes = { band: PropTypes.string.isRequired };
+
+const legendIcon = (band) => <LegendIcon band={band} />;
 
 class Header extends Component {
 
