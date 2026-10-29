@@ -2,7 +2,7 @@ const js = require("@eslint/js");
 const globals = require("globals");
 const react = require("eslint-plugin-react");
 const reactHooks = require("eslint-plugin-react-hooks");
-const reactRefresh = require("eslint-plugin-react-refresh");
+const reactRefresh = require("eslint-plugin-react-refresh").default;
 
 module.exports = [
     { ignores: ["dist"] },
