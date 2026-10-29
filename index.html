@@ -9,9 +9,39 @@
       content="Created by KP4MSR; modified by KN6PLV"
     />
     <title>Mesh Map</title>
+    <script>
+      // Paint the basemap's own background at once, and start reading appConfig.json before any app code loads.
+      (function () {
+        var mode = "system";
+        try { mode = localStorage.getItem("color-mode") || "system"; } catch (e) {}
+        var dark = mode === "dark" || (mode !== "light" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+        if (window.fetch) {
+          window.__mmConfig = fetch("appConfig.json").then(function (res) {
+            if (!res.ok) throw new Error("appConfig.json answered " + res.status);
+            return res.json();
+          });
+          window.__mmConfig.catch(function () {});
+        }
+      })();
+    </script>
+    <style>
+      html, body { margin: 0; background: #fafaf8; }
+      html.dark, html.dark body { background: #0e0e0e; }
+      .map-wrap { position: relative; width: 100%; height: 100vh; height: 100dvh; }
+      .map-wrap > .Map { position: absolute; inset: 0; z-index: 1; }
+      #boot-hint {
+        position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3;
+        padding: 6px 14px; border-radius: 14px; font: 14px system-ui, sans-serif;
+        color: #444; background: rgba(255, 255, 255, 0.8); pointer-events: none;
+      }
+      html.dark #boot-hint { color: #ccc; background: rgba(30, 30, 30, 0.8); }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="boot-wrap" class="map-wrap"><div id="boot-map" class="Map"></div></div>
+    <div id="boot-hint">Loading map</div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -1,13 +1,10 @@
-import "maplibre-gl/dist/maplibre-gl.css";
-
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { useColorMode } from "../hooks/useColorMode";
-import { BASEMAP_ATTRIBUTION, RASTER_ATTRIBUTION, mapStyle, prepareMap } from "../lib/map/setup";
+import { mapStyle } from "../lib/map/setup";
 import { LINK_TYPES, METRICS } from "../lib/meshData";
 import { meshImages } from "../lib/meshImages";
-import { viewFromUrl } from "../lib/urlView";
 import { PERF, mark } from "../lib/marks";
 import LinkPopup from "./LinkPopup";
 import NodePopup from "./NodePopup";
@@ -181,9 +178,10 @@ function autoPan(m, popup) {
   if (dx || dy) m.panBy([dx, dy], { duration: 250 });
 }
 
-export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen, setPanelOpen }) {
+export default function MeshMap({ boot, appConfig, mesh, selected, compact, panelOpen, setPanelOpen }) {
   const { isDark, modeLabel, cycleMode } = useColorMode();
   const el = useRef(null);
+  const wrap = useRef(null);
   const [map, setMap] = useState(null);
   const [failure, setFailure] = useState("");
   const [note, setNote] = useState("");
@@ -201,56 +199,44 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
     view.current = { ...view.current, mesh, selected, metric, direction, isDark, compact };
   });
 
+  // The map was started before React; move its container into this component's place before the first paint.
+  useLayoutEffect(() => {
+    const container = boot.container;
+    if (wrap.current && container.parentElement !== wrap.current) {
+      const old = container.parentElement;
+      wrap.current.prepend(container);
+      if (old && old.id === "boot-wrap") old.remove();
+    }
+    el.current = container;
+  }, [boot]);
+
   useEffect(() => {
-    if (!appConfig) return undefined;
     let cancelled = false;
-    let m = null;
-    (async () => {
-      try {
-        const settings = appConfig.mapSettings || {};
-        const [{ maplibregl, basemap: picked, changed }, images, { circleImage }] = await Promise.all([prepareMap(settings), meshImages(), import("../lib/map/style")]);
-        mark("basemap");
-        const dark = view.current.isDark;
-        const style = await mapStyle(picked, dark);
-        if (cancelled || !el.current) return;
+    let detach = null;
+    boot.map.then(
+      ({ maplibregl, map: m, basemap: picked, changed, dark }) => {
+        if (cancelled) return;
+        const offs = [];
+        const on = (type, layerOrFn, fn) => {
+          if (fn) {
+            m.on(type, layerOrFn, fn);
+            offs.push(() => m.off(type, layerOrFn, fn));
+          } else {
+            m.on(type, layerOrFn);
+            offs.push(() => m.off(type, layerOrFn));
+          }
+        };
         basemap.current = picked;
-        el.current.dataset.basemap = picked.kind;
-        view.current.images = images;
         applied.current.dark = dark;
         if (picked.kind === "none") setNote(`The basemap could not load: ${picked.reason}`);
-        const center = settings.mapCenter || {};
-        const lon = Number(center.lon);
-        const lat = Number(center.lat);
-        const zoom = Number(settings.zoom);
-        const fromUrl = viewFromUrl();
-        m = new maplibregl.Map({
-          container: el.current,
-          style,
-          center: fromUrl ? [fromUrl.lon, fromUrl.lat] : Number.isFinite(lon) && Number.isFinite(lat) ? [lon, lat] : [-96, 38],
-          // appConfig zooms are Leaflet zooms of 256 px tiles; MapLibre draws the same scale one zoom lower.
-          zoom: fromUrl ? fromUrl.zoom : Number.isFinite(zoom) ? zoom - 1 : 3,
-          minZoom: 2,
-          hash: true,
-          // Draw symbols at once instead of fading them in over 300 ms, so nodes show the moment their data does.
-          fadeDuration: 0,
-          attributionControl: false,
-          dragRotate: false,
-          pitchWithRotate: false,
+        const nav = new maplibregl.NavigationControl({ showCompass: false });
+        m.addControl(nav, "top-left");
+        import("../lib/map/style").then(({ circleImage }) => {
+          if (cancelled) return;
+          m.setMissingStyleImageResolver((id) => {
+            if (id === "circle-11" && !m.hasImage(id)) m.addImage(id, circleImage(view.current.isDark ? "#c9cbd1" : "#5a5f68"));
+          });
         });
-        mark("map");
-        if (PERF) window.__meshmap = m;
-        m.touchZoomRotate.disableRotation();
-        m.keyboard.disableRotation();
-        m.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
-        m.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: picked.kind === "raster" ? RASTER_ATTRIBUTION : BASEMAP_ATTRIBUTION }), "bottom-right");
-        m.setMissingStyleImageResolver((id) => {
-          if (id === "circle-11" && !m.hasImage(id)) m.addImage(id, circleImage(view.current.isDark ? "#c9cbd1" : "#5a5f68"));
-        });
-        if (fromUrl) {
-          const spot = document.createElement("div");
-          spot.className = "url-spot";
-          new maplibregl.Marker({ element: spot }).setLngLat([fromUrl.lon, fromUrl.lat]).addTo(m);
-        }
         const p = new maplibregl.Popup({ closeOnClick: false, maxWidth: "380px", focusAfterOpen: false });
         p.setDOMContent(popupBox);
         p.on("close", () => {
@@ -258,10 +244,16 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
           setPopup(null);
         });
         popupRef.current = p;
-        // The mesh layers go in once the basemap has loaded, so streaming nodes never hold up the basemap's load.
+        // The mesh layers go in once the basemap style has loaded; the mesh data itself starts after the first basemap tiles draw.
         let loaded = false;
-        m.on("styledata", () => loaded && ensureLayers(m, view.current, applied.current));
-        m.on("click", (e) => {
+        const layersReady = () => loaded && ensureLayers(m, view.current, applied.current);
+        meshImages().then((images) => {
+          if (cancelled) return;
+          view.current.images = images;
+          layersReady();
+        });
+        on("styledata", layersReady);
+        on("click", (e) => {
           if (view.current.compact) return;
           const pt = e.point;
           const nodes = m.getLayer(NODE_LAYER) ? m.queryRenderedFeatures(pt, { layers: [NODE_LAYER] }) : [];
@@ -281,18 +273,19 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
           opening.current = null;
           view.current.mesh.getLink(links[0].properties.id).then((conn) => setPopup(conn ? { kind: "link", conn, lngLat } : null), () => setPopup(null));
         });
-        m.on("mouseenter", [NODE_LAYER, ...LINK_LAYERS], () => {
+        const pointer = () => {
           if (!view.current.compact) m.getCanvas().style.cursor = "pointer";
-        });
-        m.on("mouseleave", [NODE_LAYER, ...LINK_LAYERS], () => {
+        };
+        const plain = () => {
           m.getCanvas().style.cursor = "";
-        });
+        };
+        on("mouseenter", [NODE_LAYER, ...LINK_LAYERS], pointer);
+        on("mouseleave", [NODE_LAYER, ...LINK_LAYERS], plain);
         if (PERF) {
-          // Records when the map first drew the basemap, and every node count it drew, for tests and benchmarks.
+          // Records every node count the map drew, for tests and benchmarks.
           let lastDrawn = "";
           window.__meshDrawn = [];
-          m.once("load", () => mark("basemap-drawn"));
-          m.on("render", () => {
+          on("render", () => {
             const a = applied.current.landed;
             if (!a || !a.nodeCount) return;
             const now = `${a.nodeCount}/${a.complete}`;
@@ -311,29 +304,45 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
           if (!cancelled) m.setStyle(nextStyle);
         });
         applied.current.repaint = () => m.triggerRepaint();
-        m.once("load", () => {
+        const styleReady = () => {
+          if (cancelled) return;
           loaded = true;
-          mark("load");
           el.current?.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show");
-          ensureLayers(m, view.current, applied.current);
-          if (!cancelled) setMap(m);
-        });
-      } catch (err) {
+          layersReady();
+          setMap(m);
+        };
+        boot.styled.then(styleReady);
+        detach = () => {
+          offs.forEach((off) => off());
+          m.removeControl(nav);
+          p.remove();
+        };
+      },
+      (err) => {
         console.error(err);
         if (!cancelled) setFailure(err instanceof Error ? err.message : String(err));
-      }
-    })();
+      },
+    );
     return () => {
       cancelled = true;
-      popupRef.current?.remove();
+      detach?.();
       popupRef.current = null;
-      m?.remove();
       setMap(null);
     };
-  }, [appConfig, popupBox]);
+  }, [boot, popupBox]);
 
   useEffect(() => {
     if (map) applyMesh(map, mesh, applied.current);
+  }, [map, mesh]);
+
+  // The map's container is not rendered by React, so its state for tests goes on it here.
+  useEffect(() => {
+    const c = el.current;
+    if (!c) return;
+    if (map) c.dataset.ready = "true";
+    else delete c.dataset.ready;
+    if (PERF && map && mesh.complete) c.dataset.nodes = String(mesh.nodeCount);
+    else delete c.dataset.nodes;
   }, [map, mesh]);
 
   useEffect(() => {
@@ -396,8 +405,7 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
   }
 
   return (
-    <div className={compact ? "map-wrap compact" : "map-wrap"}>
-      <div ref={el} className="Map" data-ready={map ? "true" : undefined} data-nodes={PERF && map && mesh.complete ? mesh.nodeCount : undefined} />
+    <div ref={wrap} className={compact ? "map-wrap compact" : "map-wrap"}>
       {!compact && (
         <MapControls metric={metric} direction={direction} setMetric={setMetric} setDirection={setDirection} modeLabel={modeLabel} cycleMode={cycleMode} open={panelOpen} setOpen={setPanelOpen} />
       )}
@@ -408,6 +416,7 @@ export default function MeshMap({ appConfig, mesh, selected, compact, panelOpen,
 }
 
 MeshMap.propTypes = {
+  boot: PropTypes.object.isRequired,
   appConfig: PropTypes.object,
   mesh: PropTypes.object.isRequired,
   selected: PropTypes.string,

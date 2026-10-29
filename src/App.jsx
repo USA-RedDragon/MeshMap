@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import MeshMap from "./components/MeshMap";
 import sysinfo from "./APIResources.json";
 import axios from "axios";
@@ -8,31 +9,15 @@ import alertify from "alertifyjs";
 import "alertifyjs/build/css/themes/default.min.css";
 import "alertifyjs/build/css/alertify.min.css";
 import Header from "./components/Header";
-import { mark } from "./lib/marks";
 import { toNode } from "./lib/meshData";
-import { EMPTY_MESH, loadMesh, meshFromNodes } from "./lib/meshStore";
+import { EMPTY_MESH, meshFromNodes } from "./lib/meshStore";
+import { storedMesh } from "./lib/meshEarly";
 import { COMPACT_QUERY, NARROW_QUERY, useMediaQuery } from "./hooks/useMediaQuery";
 
-/** DEFAULT_DATA_URL is the mesh data file, relative to the page, when appConfig.json names none. */
-const DEFAULT_DATA_URL = "data/out.json";
-
-/** DEFAULT_MAP_DATA_URL is the walker's slim map file, read before the full data file. */
-const DEFAULT_MAP_DATA_URL = "data/map.json";
-
-/** busted is url with a cache buster unless appConfig.json turns it off. */
-function busted(appConfig, url) {
-  if (appConfig.dataCacheBuster === false) return url;
-  return `${url}${url.includes("?") ? "&" : "?"}t=${Date.now().toFixed(0)}`;
-}
-
-async function loadStored(appConfig, setData) {
+async function loadStored(stored, setData) {
   try {
-    const urls = {
-      url: busted(appConfig, appConfig.dataUrl || DEFAULT_DATA_URL),
-      mapUrl: appConfig.mapDataUrl === false ? undefined : busted(appConfig, appConfig.mapDataUrl || DEFAULT_MAP_DATA_URL),
-      detailsUrl: appConfig.detailsUrl,
-    };
-    const meta = await loadMesh(urls, (mesh) => setData((d) => ({ ...d, mesh })));
+    stored.subscribe((mesh) => setData((d) => ({ ...d, mesh })));
+    const meta = await stored.meta;
     setData((d) => ({ ...d, nonMapped: meta.nonMapped, hostsScraped: meta.hostsScraped, lastUpdated: meta.date }));
     const date = new Date(meta.date);
     if (new Date() - date > 24 * 60 * 60 * 1000) {
@@ -60,7 +45,7 @@ async function crawl(appConfig, addNode) {
   });
 }
 
-export default function App() {
+export default function App({ boot }) {
   const [appConfig, setAppConfig] = useState(null);
   const [data, setData] = useState({ mesh: EMPTY_MESH, nonMapped: 0, hostsScraped: 0, lastUpdated: null });
   const [crawled, setCrawled] = useState([]);
@@ -85,10 +70,14 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await axios.get("appConfig.json");
+      let config;
+      try {
+        config = await boot.config;
+      } catch (e) {
+        if (!cancelled) alertify.alert(e.toString());
+        return;
+      }
       if (cancelled) return;
-      const config = res.data;
-      mark("config");
       setAppConfig(config);
       document.title = `${config.contactInfo.callsign} - ${import.meta.env.VITE_APP_NAME} ${import.meta.env.VITE_APP_VERSION} by ${import.meta.env.VITE_APP_CREATOR}`;
       if (!config.offline) {
@@ -100,7 +89,8 @@ export default function App() {
         }
       }
       try {
-        await loadStored(config, (d) => !cancelled && setData(d));
+        const stored = (await boot.stored) ?? storedMesh(config);
+        await loadStored(stored, (d) => !cancelled && setData(d));
       } catch {
         alertify.alert("Unable to find your node, please verify if you are connected to the mesh.");
       }
@@ -108,7 +98,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [boot]);
 
   return (
     <div>
@@ -125,7 +115,11 @@ export default function App() {
           setOpen={setLegendOpen}
         />
       )}
-      <MeshMap appConfig={appConfig} mesh={mesh} selected={selected} compact={compact} panelOpen={panelOpen} setPanelOpen={setPanelOpen} />
+      <MeshMap boot={boot} appConfig={appConfig} mesh={mesh} selected={selected} compact={compact} panelOpen={panelOpen} setPanelOpen={setPanelOpen} />
     </div>
   );
 }
+
+App.propTypes = {
+  boot: PropTypes.object.isRequired,
+};

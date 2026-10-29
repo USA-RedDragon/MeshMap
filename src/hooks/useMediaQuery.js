@@ -1,7 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-/** COMPACT_QUERY matches the small map tile the AREDN node pages embed: small in both directions, or short. */
-export const COMPACT_QUERY = "((max-width: 499px) and (max-height: 499px)), (max-height: 299px)";
+export { COMPACT_QUERY } from "../lib/map/boot";
 
 /** NARROW_QUERY matches screens too narrow for the legend and the link panel to be open side by side. */
 export const NARROW_QUERY = "(max-width: 699px)";
