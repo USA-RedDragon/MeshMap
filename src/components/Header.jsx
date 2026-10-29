@@ -1,6 +1,10 @@
 import { Component } from "react";
 import PropTypes from "prop-types";
-import meshIconUrl from "../img/mesh_icon.svg";
+import { BANDS } from "../lib/meshData";
+import { meshIconUrl } from "../lib/meshImages";
+
+const LEGEND_PX = 20;
+const legendIcon = (band) => <img className="mesh-icon" src={meshIconUrl(BANDS[band].color, LEGEND_PX)} width={LEGEND_PX} height={LEGEND_PX} alt="" />;
 
 class Header extends Component {
 
@@ -48,43 +52,43 @@ class Header extends Component {
             </tr>
             {
               counts.halow ? <tr className={ 'halow-' + this.props.selected }>
-                <td><a href="#" onClick={(e)=>this.selectNodes(e, 'halow')}><div className="mesh-icon mesh-icon-teal" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> HaLow</a></td>
+                <td><a href="#" onClick={(e)=>this.selectNodes(e, 'halow')}>{legendIcon("halow")} HaLow</a></td>
                 <td>{counts.halow}</td>
               </tr> : ""
             }
             {
               counts.b900 ? <tr className={ 'b900-' + this.props.selected }>
-                <td><a href="#" onClick={(e)=>this.selectNodes(e, '900')}><div className="mesh-icon mesh-icon-magenta" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 900 MHz</a></td>
+                <td><a href="#" onClick={(e)=>this.selectNodes(e, '900')}>{legendIcon("900")} 900 MHz</a></td>
                 <td>{counts.b900}</td>
               </tr> : ""
             }
             {
               counts.b24 ? <tr className={ 'b24-' + this.props.selected }>
-                <td><a href="#" onClick={(e)=>this.selectNodes(e, '24')}><div className="mesh-icon mesh-icon-purple" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 2.4 GHz</a></td>
+                <td><a href="#" onClick={(e)=>this.selectNodes(e, '24')}>{legendIcon("24")} 2.4 GHz</a></td>
                 <td>{counts.b24}</td>
               </tr> : ""
             }
             {
               counts.b34 ? <tr className={ 'b34-' + this.props.selected }>
-                <td><a href="#" onClick={(e)=>this.selectNodes(e, '34')}><div className="mesh-icon mesh-icon-blue" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 3.4 GHz</a></td>
+                <td><a href="#" onClick={(e)=>this.selectNodes(e, '34')}>{legendIcon("34")} 3.4 GHz</a></td>
                 <td>{counts.b34}</td>
               </tr> : ""
             }
             {
               counts.b58 ? <tr className={ 'b58-' + this.props.selected }>
-                <td><a href="#" onClick={(e)=>this.selectNodes(e, '58')}><div className="mesh-icon mesh-icon-gold" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> 5 GHz</a></td>
+                <td><a href="#" onClick={(e)=>this.selectNodes(e, '58')}>{legendIcon("58")} 5 GHz</a></td>
                 <td>{counts.b58}</td>
               </tr> : ""
             }
             {
               counts.supernode ? <tr className={ 'supernode-' + this.props.selected }>
-                <td><a href="#" onClick={(e)=>this.selectNodes(e, 'supernode')}><div className="mesh-icon mesh-icon-green" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> Supernode</a></td>
+                <td><a href="#" onClick={(e)=>this.selectNodes(e, 'supernode')}>{legendIcon("supernode")} Supernode</a></td>
                 <td>{counts.supernode}</td>
               </tr> : ""
             }
             {
               counts.off ? <tr className={ 'off-' + this.props.selected }>
-                <td><a href="#" onClick={(e)=>this.selectNodes(e, 'off')}><div className="mesh-icon mesh-icon-gray" style={{width: 20, height: 20, display: 'inline-block', verticalAlign: 'middle'}}><img src={meshIconUrl} style={{width: '100%', height: '100%', display: 'block'}} /></div> No RF</a></td>
+                <td><a href="#" onClick={(e)=>this.selectNodes(e, 'off')}>{legendIcon("off")} No RF</a></td>
                 <td>{counts.off}</td>
               </tr> : ""
             }

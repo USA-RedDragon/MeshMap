@@ -91,23 +91,10 @@ body {
 }
 
 /* Mesh Icon Styles */
-.mesh-icon-marker {
-  border-radius: 50%;
+.mesh-icon {
+  display: inline-block;
+  vertical-align: middle;
 }
-
-.mesh-icon-img {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.mesh-icon-purple { background-color: #810490; border-radius: 50%; }
-.mesh-icon-gold { background-color: #ff9742; border-radius: 50%; }
-.mesh-icon-blue { background-color: #0000f8; border-radius: 50%; }
-.mesh-icon-magenta { background-color: #c561ec; border-radius: 50%; }
-.mesh-icon-teal { background-color: #08b7b2; border-radius: 50%; }
-.mesh-icon-gray { background-color: #707070; border-radius: 50%; }
-.mesh-icon-green { background-color: #148406; border-radius: 50%; }
 
 /* Panels */
 .panel-toggle {

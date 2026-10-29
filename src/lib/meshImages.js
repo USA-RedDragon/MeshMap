@@ -5,7 +5,11 @@ import { BANDS } from "./meshData";
 /** ICON_PX is the on-screen size of a node icon and its azimuth arrow, as the older map drew them. */
 export const ICON_PX = 25;
 
-const RATIO = 3;
+/** meshIconUrl returns the node icon as a data URL, with the badge in the given color. */
+export function meshIconUrl(color, px = ICON_PX) {
+  const svg = meshIconSvg.replace("currentColor", color).replace("<svg ", `<svg width="${px}" height="${px}" `);
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
 
 const loadImage = (src) =>
   new Promise((resolve, reject) => {
@@ -15,37 +19,30 @@ const loadImage = (src) =>
     img.src = src;
   });
 
-const draw = (paint) => {
-  const size = ICON_PX * RATIO;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const g = canvas.getContext("2d");
-  paint(g, size);
-  return { data: g.getImageData(0, 0, size, size), pixelRatio: RATIO };
-};
-
 let images = null;
 
 /**
- * meshImages draws the map icons once per page: one node icon per band, the mesh glyph on a disc of the band's
- * color, and the azimuth arrow. The SVG gets a size first, since some browsers will not draw one without it.
+ * meshImages draws the map icons once per page at the screen's pixel density: one node icon per band and the
+ * azimuth arrow. The SVG gets a size first, since some browsers will not draw one without it.
  */
 export function meshImages() {
   if (!images) {
-    const svg = meshIconSvg.replace("<svg ", '<svg width="512" height="512" ');
-    images = Promise.all([loadImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`), loadImage(arrowUrl)]).then(([icon, arrow]) => {
-      const out = {};
-      for (const [band, { color }] of Object.entries(BANDS)) {
-        out[`node-${band}`] = draw((g, size) => {
-          g.fillStyle = color;
-          g.beginPath();
-          g.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
-          g.fill();
-          g.drawImage(icon, 0, 0, size, size);
-        });
-      }
-      out.arrow = draw((g, size) => g.drawImage(arrow, 0, 0, size, size));
+    const ratio = Math.max(1, window.devicePixelRatio || 1);
+    const size = Math.round(ICON_PX * ratio);
+    const draw = (img) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const g = canvas.getContext("2d");
+      g.drawImage(img, 0, 0, size, size);
+      return { data: g.getImageData(0, 0, size, size), pixelRatio: ratio };
+    };
+    const bands = Object.entries(BANDS);
+    images = Promise.all([loadImage(arrowUrl), ...bands.map(([, { color }]) => loadImage(meshIconUrl(color, size)))]).then(([arrow, ...icons]) => {
+      const out = { arrow: draw(arrow) };
+      bands.forEach(([band], i) => {
+        out[`node-${band}`] = draw(icons[i]);
+      });
       return out;
     });
     images.catch(() => {
