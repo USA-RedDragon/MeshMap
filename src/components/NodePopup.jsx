@@ -56,7 +56,7 @@ export default function NodePopup({ node: n, byName, active, openNode }) {
               <tr><td>MAC</td><td>{n.slim ? "\u2026" : n.interfaces && n.interfaces[0] && n.interfaces[0].mac ? n.interfaces[0].mac : "N/A"}</td></tr>
             </>
           )}
-          {n.slim && <tr><td>Details</td><td>Loading{"\u2026"}</td></tr>}
+          {n.slim && <tr><td>Details</td><td>{n.slim === "failed" ? "Unavailable" : "Loading\u2026"}</td></tr>}
           {n.node_details && <tr style={{ verticalAlign: "top" }}><td>Hardware</td><td>{hardware(n.node_details.board_id) || n.node_details.model}</td></tr>}
           {n.node_details && <tr><td width="80">Firmware</td><td>{n.node_details.firmware_version}</td></tr>}
           <tr style={{ verticalAlign: "top", whiteSpace: "nowrap" }}>

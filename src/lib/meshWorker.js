@@ -152,6 +152,7 @@ async function nodeModel(id, name) {
     if (full) Object.assign(entry, toNode(full), { slim: false });
   } catch {
     // The popup keeps what map.json had.
+    entry.slim = "failed";
   }
   return nodePopupModel(mesh, name);
 }
