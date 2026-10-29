@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { useColorMode } from "../hooks/useColorMode";
 import { mapStyle } from "../lib/map/setup";
-import { LINK_TYPES, METRICS } from "../lib/meshData";
+import { BANDS, LINK_TYPES, METRICS } from "../lib/meshData";
 import { meshImages } from "../lib/meshImages";
 import { PERF, mark } from "../lib/marks";
 import LinkPopup from "./LinkPopup";
@@ -62,7 +62,26 @@ function applyMesh(m, mesh, applied) {
     }
   }
   applied.mesh = mesh;
+  colorSpot(mesh);
   if (PERF && mesh.complete) nodesDone(Promise.resolve(), mesh, applied);
+}
+
+/** colorSpot gives the URL location ring the band color of the node that sits on it. */
+function colorSpot(mesh) {
+  const spot = document.querySelector(".url-spot");
+  if (!spot || !mesh) return;
+  const lon = Number(spot.dataset.lon), lat = Number(spot.dataset.lat);
+  let best = null, bestD = 1e-6;
+  for (const f of mesh.features.nodes) {
+    const [x, y] = f.geometry.coordinates;
+    const d = (x - lon) ** 2 + (y - lat) ** 2;
+    if (d <= bestD) {
+      best = f;
+      bestD = d;
+    }
+  }
+  const color = best && BANDS[best.properties.band]?.color;
+  if (color) spot.style.setProperty("--spot-color", color);
 }
 
 /** nodesDone notes, for benchmarks, the node count the map's worker holds once an update lands. */
@@ -120,6 +139,7 @@ function ensureLayers(m, v, applied) {
   // Links and icons come from separate sources that finish at different times, so all of them stay transparent
   // until the map is idle and then appear in the same frame.
   m.once("idle", () => {
+    colorSpot(v.mesh);
     for (const t of LINK_TYPES) if (m.getLayer(linkLayerId(t))) m.setPaintProperty(linkLayerId(t), "line-opacity", 1);
     for (const id of [ARROW_LAYER, NODE_LAYER]) if (m.getLayer(id)) m.setPaintProperty(id, "icon-opacity", 1);
   });

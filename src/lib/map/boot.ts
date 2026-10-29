@@ -140,6 +140,8 @@ export function startBoot(container: HTMLElement): Boot {
     if (fromUrl) {
       const spot = document.createElement('div');
       spot.className = 'url-spot';
+      spot.dataset.lon = String(fromUrl.lon);
+      spot.dataset.lat = String(fromUrl.lat);
       new maplibregl.Marker({ element: spot }).setLngLat([fromUrl.lon, fromUrl.lat]).addTo(m);
     }
     // A basemap list changed since the last visit wins over the remembered one once one of its bases answers.

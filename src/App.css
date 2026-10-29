@@ -249,12 +249,16 @@ body {
 
 /* The position a node page asked for in the URL, marked on its small map tile */
 .url-spot {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #e0245e;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--spot-color, rgba(40, 44, 52, 0.45));
   border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85);
   pointer-events: none;
+}
+
+.dark .url-spot {
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.6);
 }
 
 /* Compact: the small map tile of the AREDN node pages shows nodes and links only */
