@@ -22,7 +22,7 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import { PMTiles, Protocol } from 'pmtiles';
 
 import { mark } from '../marks';
-import { cachedAsset, cachedUrl, CACHED_PROTOCOL } from './assetCache';
+import { cachedAsset, cachedUrl, CACHED_PROTOCOL, warmAsset } from './assetCache';
 import { type Basemap as Archive, chooseBasemap, clearOldArchives, DEFAULT_BASEMAPS, PROBE_TIMEOUT_MS, sourceOf } from './archive';
 
 /** BASEMAP_ATTRIBUTION credits the basemap's data. */
@@ -86,14 +86,28 @@ function probeRaster(server: RasterServer, timeoutMs: number): Promise<string | 
   });
 }
 
-async function pickBasemap(protocol: Protocol, settings: MapSettings): Promise<Omit<Prepared, 'maplibregl'>> {
-  const bases = settings.basemaps?.length ? settings.basemaps : DEFAULT_BASEMAPS;
+/** protocol serves the basemap archives to MapLibre. */
+const protocol = new Protocol();
+
+function use(a: Archive): Basemap {
+  protocol.add(new PMTiles(sourceOf(a.archive, a.layout)));
+  void clearOldArchives(a.archive).catch(() => undefined);
+  return { kind: 'archive', archive: a.archive };
+}
+
+const basesOf = (settings: MapSettings) => (settings.basemaps?.length ? settings.basemaps : DEFAULT_BASEMAPS);
+
+/** rebase picks the first basemap of settings that answers, for a basemap list that changed after the map started. */
+export async function rebase(settings: MapSettings): Promise<Basemap> {
+  const bases = basesOf(settings);
+  const found = await chooseBasemap(bases, Number(settings.basemapTimeoutMs) || PROBE_TIMEOUT_MS);
+  remember(bases, found);
+  return use(found);
+}
+
+async function pickBasemap(settings: MapSettings): Promise<Omit<Prepared, 'maplibregl'>> {
+  const bases = basesOf(settings);
   const timeout = Number(settings.basemapTimeoutMs) || PROBE_TIMEOUT_MS;
-  const use = (a: Archive): Basemap => {
-    protocol.add(new PMTiles(sourceOf(a.archive, a.layout)));
-    void clearOldArchives(a.archive).catch(() => undefined);
-    return { kind: 'archive', archive: a.archive };
-  };
   const probe = chooseBasemap(bases, timeout);
   const known = remembered(bases);
   if (known) {
@@ -128,18 +142,20 @@ async function pickBasemap(protocol: Protocol, settings: MapSettings): Promise<O
   return { basemap: { kind: 'none', reason }, changed: Promise.resolve(null) };
 }
 
-/** prepareMap loads MapLibre and finds the first basemap that answers, once per page. */
+/** prepareMap loads MapLibre and finds the first basemap that answers, once per page. The two run side by side. */
 export function prepareMap(settings: MapSettings = {}): Promise<Prepared> {
   if (!prepared) {
-    prepared = (async () => {
+    const lib = (async () => {
       const maplibregl = await import('maplibre-gl');
       mark('maplibre');
       maplibregl.setWorkerUrl(new URL(workerUrl, document.baseURI).href);
       maplibregl.addProtocol(CACHED_PROTOCOL, cachedAsset);
-      const protocol = new Protocol();
       maplibregl.addProtocol('pmtiles', protocol.tile);
-      return { maplibregl, ...(await pickBasemap(protocol, settings)) };
+      // Start the map's workers now, so their script loads while the basemap is still being chosen.
+      maplibregl.prewarm();
+      return maplibregl;
     })();
+    prepared = Promise.all([lib, pickBasemap(settings)]).then(([maplibregl, picked]) => ({ maplibregl, ...picked }));
     prepared.catch(() => {
       prepared = null;
     });
@@ -173,4 +189,21 @@ export async function mapStyle(basemap: Basemap, dark: boolean): Promise<StyleSp
     style.layers.push({ id: 'raster', type: 'raster', source: 'raster' });
   }
   return style;
+}
+
+/** warmGlyphs starts loading the first glyph range of every font style uses, so labels do not wait for the first tiles to ask. */
+export function warmGlyphs(style: StyleSpecification): void {
+  if (!style.glyphs?.startsWith(`${CACHED_PROTOCOL}://`)) {
+    return;
+  }
+  const stacks = new Set<string>();
+  for (const layer of style.layers) {
+    const font = (layer as { layout?: { 'text-font'?: unknown } }).layout?.['text-font'];
+    if (Array.isArray(font) && font.every((f) => typeof f === 'string')) {
+      stacks.add(font.join(','));
+    }
+  }
+  for (const stack of stacks) {
+    warmAsset(style.glyphs.replace('{fontstack}', encodeURIComponent(stack)).replace('{range}', '0-255'));
+  }
 }
