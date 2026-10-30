@@ -215,7 +215,7 @@ export class MeshBuilder {
       this.nodeCount++;
       const az = n.meshrf ? n.meshrf.azimuth : undefined;
       if (az !== null && az !== undefined && az !== "" && Number.isFinite(Number(az))) {
-        const arrow = { type: "Feature", id: this.features.arrows.length, properties: { band: n.band, rot: parseInt(az) - 45 }, geometry: { type: "Point", coordinates: coords } };
+        const arrow = { type: "Feature", id: this.features.arrows.length, properties: { band: n.band, rot: parseInt(az) }, geometry: { type: "Point", coordinates: coords } };
         this.features.arrows.push(arrow);
         diff.arrows.push(arrow);
       }

@@ -1,5 +1,5 @@
 import meshIconSvg from "../img/mesh_icon.svg?raw";
-import arrowUrl from "../img/mesh_arrow_75px_gray.png";
+import meshArrowSvg from "../img/mesh_arrow.svg?raw";
 import { BANDS } from "./meshData";
 
 /** ICON_PX is the on-screen size of a node icon and its azimuth arrow, as the older map drew them. */
@@ -9,13 +9,23 @@ export const ICON_PX = 25;
 const RIM = { light: "#5a5f68", dark: "#ffffff" };
 const RIM_ATTR = 'stroke="#f7f7f7" stroke-width';
 
+/** ARROW_SCALE is the azimuth arrow image's size relative to the node icon: it wraps the icon and points past it. */
+export const ARROW_SCALE = 2;
+
+const svgUrl = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+
+/** meshArrowUrl returns the azimuth arrow as a data URL, colored like the icon outline for the theme. */
+function meshArrowUrl(px, dark) {
+  return svgUrl(meshArrowSvg.replace('fill="#707070"', `fill="${dark ? RIM.dark : RIM.light}"`).replace("<svg ", `<svg width="${px}" height="${px}" `));
+}
+
 /** meshIconUrl returns the node icon as a data URL, with the badge in the given color and the outline set for the theme. */
 export function meshIconUrl(color, px = ICON_PX, dark = false) {
   const svg = meshIconSvg
     .replace("currentColor", color)
     .replace(RIM_ATTR, `stroke="${dark ? RIM.dark : RIM.light}" stroke-width`)
     .replace("<svg ", `<svg width="${px}" height="${px}" `);
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  return svgUrl(svg);
 }
 
 const loadImage = (src) =>
@@ -37,17 +47,18 @@ export function meshImages(dark = false) {
   if (!images[key]) {
     const ratio = Math.max(1, window.devicePixelRatio || 1);
     const size = Math.round(ICON_PX * ratio);
-    const draw = (img) => {
+    const draw = (img, px = size) => {
       const canvas = document.createElement("canvas");
-      canvas.width = size;
-      canvas.height = size;
+      canvas.width = px;
+      canvas.height = px;
       const g = canvas.getContext("2d");
-      g.drawImage(img, 0, 0, size, size);
-      return { data: g.getImageData(0, 0, size, size), pixelRatio: ratio };
+      g.drawImage(img, 0, 0, px, px);
+      return { data: g.getImageData(0, 0, px, px), pixelRatio: ratio };
     };
+    const arrowSize = size * ARROW_SCALE;
     const bands = Object.entries(BANDS);
-    images[key] = Promise.all([loadImage(arrowUrl), ...bands.map(([, { color }]) => loadImage(meshIconUrl(color, size, dark)))]).then(([arrow, ...icons]) => {
-      const out = { arrow: draw(arrow) };
+    images[key] = Promise.all([loadImage(meshArrowUrl(arrowSize, dark)), ...bands.map(([, { color }]) => loadImage(meshIconUrl(color, size, dark)))]).then(([arrow, ...icons]) => {
+      const out = { arrow: draw(arrow, arrowSize) };
       bands.forEach(([band], i) => {
         out[`node-${band}`] = draw(icons[i]);
       });
