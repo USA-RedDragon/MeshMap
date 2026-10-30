@@ -172,11 +172,28 @@ function rasterTiles(url: string): string[] {
   return url.includes('{s}') ? ['a', 'b', 'c'].map((s) => url.replace('{s}', s)) : [url];
 }
 
+/**
+ * strengthenBorders darkens the light style's country and state lines. Zoomed out over a whole region the light
+ * land is almost one flat color, and the stock pale pink borders disappear into it.
+ */
+function strengthenBorders(style: StyleSpecification): void {
+  for (const layer of style.layers) {
+    if (layer.type !== 'line') continue;
+    if (layer.id === 'boundary_state') {
+      layer.paint = { ...layer.paint, 'line-color': '#b3a0a3', 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.8, 6, 1.2, 10, 1.6] };
+    } else if (layer.id === 'boundary_country_inner') {
+      layer.paint = { ...layer.paint, 'line-color': '#8f7b7e', 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2] };
+    }
+  }
+}
+
 /** mapStyle is the basemap style for a theme. */
 export async function mapStyle(basemap: Basemap, dark: boolean): Promise<StyleSpecification> {
   if (basemap.kind === 'archive') {
     const [{ basemapStyle }, json] = await Promise.all([import('./style'), dark ? import('./styles/dark.json') : import('./styles/light.json')]);
-    return basemapStyle(json.default as unknown as StyleSpecification, basemap.archive, glyphsUrl());
+    const style = basemapStyle(json.default as unknown as StyleSpecification, basemap.archive, glyphsUrl());
+    if (!dark) strengthenBorders(style);
+    return style;
   }
   const style: StyleSpecification = {
     version: 8,
