@@ -5,8 +5,8 @@ import { BANDS } from "./meshData";
 /** ICON_PX is the on-screen size of a node icon and its azimuth arrow, as the older map drew them. */
 export const ICON_PX = 25;
 
-/** RIM is the color of the badge outline: the opposite of the theme, so the icon edge shows on either basemap. */
-const RIM = { light: "#000000", dark: "#ffffff" };
+/** RIM is the color of the badge outline: gray on the light map, white on the dark map, so the icon edge shows on either. */
+const RIM = { light: "#5a5f68", dark: "#ffffff" };
 const RIM_ATTR = 'stroke="#f7f7f7" stroke-width';
 
 /** meshIconUrl returns the node icon as a data URL, with the badge in the given color and the outline set for the theme. */
