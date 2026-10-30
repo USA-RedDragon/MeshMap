@@ -15,7 +15,7 @@ body {
   padding: 8px;
   z-index: 2;
   color: black;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: #ffffff;
   margin: 10px;
   font-size: 15px;
   border: 1px solid grey;
@@ -103,7 +103,7 @@ body {
   padding: 4px 10px;
   border: 1px solid grey;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.85);
+  background: #ffffff;
   color: inherit;
   cursor: pointer;
 }
@@ -191,7 +191,7 @@ body {
   padding: 6px 12px;
   border: 1px solid grey;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   color: black;
   font-size: 13px;
 }
@@ -269,7 +269,7 @@ body {
 /* Dark theme */
 .dark .Header {
   color: #e8e8e8;
-  background-color: rgba(28, 30, 34, 0.75);
+  background-color: #1c1e22;
   border-color: #555;
 }
 
@@ -283,7 +283,7 @@ body {
 }
 
 .dark .panel-toggle {
-  background: rgba(36, 39, 44, 0.9);
+  background: #24272c;
   color: #e8e8e8;
 }
 
@@ -294,7 +294,7 @@ body {
 }
 
 .dark .map-failure {
-  background: rgba(36, 39, 44, 0.9);
+  background: #24272c;
   color: #e8e8e8;
 }
 
