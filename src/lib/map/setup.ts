@@ -173,16 +173,23 @@ function rasterTiles(url: string): string[] {
 }
 
 /**
- * strengthenBorders darkens the light style's country and state lines. Zoomed out over a whole region the light
- * land is almost one flat color, and the stock pale pink borders disappear into it.
+ * BORDERS sets the country and state lines the same way in both themes: solid while zoomed out, dashed from zoom 7,
+ * with the same widths, and colors of about the same contrast against each theme's land. The stock light style's pale
+ * pink borders disappear when zoomed out over a whole region, and the stock dark style dots its state lines at every zoom.
  */
-function strengthenBorders(style: StyleSpecification): void {
+const BORDERS = {
+  state: { light: '#b3a0a3', dark: '#676772', width: ['interpolate', ['linear'], ['zoom'], 3, 0.8, 6, 1.2, 10, 1.6] },
+  country: { light: '#8f7b7e', dark: '#7a7a80', width: ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2] },
+};
+
+function tuneBorders(style: StyleSpecification, dark: boolean): void {
+  const theme = dark ? 'dark' : 'light';
   for (const layer of style.layers) {
     if (layer.type !== 'line') continue;
     if (layer.id === 'boundary_state') {
-      layer.paint = { ...layer.paint, 'line-color': '#b3a0a3', 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.8, 6, 1.2, 10, 1.6] };
+      layer.paint = { ...layer.paint, 'line-color': BORDERS.state[theme], 'line-width': BORDERS.state.width, 'line-dasharray': ['step', ['zoom'], ['literal', [1]], 7, ['literal', [2, 2]]] } as typeof layer.paint;
     } else if (layer.id === 'boundary_country_inner') {
-      layer.paint = { ...layer.paint, 'line-color': '#8f7b7e', 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.2, 6, 2] };
+      layer.paint = { ...layer.paint, 'line-color': BORDERS.country[theme], 'line-width': BORDERS.country.width } as typeof layer.paint;
     }
   }
 }
@@ -192,7 +199,7 @@ export async function mapStyle(basemap: Basemap, dark: boolean): Promise<StyleSp
   if (basemap.kind === 'archive') {
     const [{ basemapStyle }, json] = await Promise.all([import('./style'), dark ? import('./styles/dark.json') : import('./styles/light.json')]);
     const style = basemapStyle(json.default as unknown as StyleSpecification, basemap.archive, glyphsUrl());
-    if (!dark) strengthenBorders(style);
+    tuneBorders(style, dark);
     return style;
   }
   const style: StyleSpecification = {
