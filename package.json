@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@maplibre/maplibre-gl-style-spec": "26.4.4",
+    "@maplibre/maplibre-gl-style-spec": "26.5.0",
     "alertifyjs": "1.14.0",
     "axios": "1.21.0",
     "bootstrap": "5.3.8",
