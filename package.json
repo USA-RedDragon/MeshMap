@@ -5,11 +5,11 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@maplibre/maplibre-gl-style-spec": "26.5.1",
+    "@maplibre/maplibre-gl-style-spec": "26.6.0",
     "alertifyjs": "1.14.0",
-    "axios": "1.21.0",
+    "axios": "1.21.1",
     "bootstrap": "5.3.8",
-    "maplibre-gl": "6.16.0",
+    "maplibre-gl": "6.17.0",
     "pmtiles": "4.5.0",
     "react": "19.3.1",
     "react-bootstrap": "2.10.10",
@@ -23,7 +23,7 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-react-refresh": "0.5.7",
-    "vite": "7.3.7"
+    "vite": "7.3.8"
   },
   "scripts": {
     "start": "npm run dev",
